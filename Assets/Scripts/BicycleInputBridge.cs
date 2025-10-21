@@ -11,6 +11,8 @@ namespace SBPScripts
 
         // Input values
         private Vector2 moveInput;
+        private bool accelerateInput;  // ZR trigger
+        private bool brakeInput;       // ZL trigger
         private bool sprintInput;
         private bool jumpInput;
         private bool wheelieInput;
@@ -19,21 +21,33 @@ namespace SBPScripts
         private bool wasJumpPressed;
 
         [Header("Input Sensitivity")]
-        [Tooltip("Multiplier for steering input (higher = more responsive)")]
-        public float steerSensitivityMultiplier = 3f;
-        [Tooltip("Deadzone for stick input (0-1)")]
+        public float steerSensitivityMultiplier = 5f;
         public float stickDeadzone = 0.15f;
+
+        [Header("Trigger Settings")]
+        [Tooltip("How fast triggers ramp up/down (higher = more responsive)")]
+        public float triggerSensitivity = 3f;
+
+        [Header("Debug")]
+        public bool showDebugLogs = true;
+
+        // Smooth trigger values (for feel, even though triggers are digital)
+        private float smoothedAcceleration = 0f;
 
         void Awake()
         {
             bicycleController = GetComponent<BicycleController>();
-
-            // Initialize input actions
             inputActions = new InputSystem_Actions();
 
             // Subscribe to input events
             inputActions.Player.Move.performed += OnMove;
             inputActions.Player.Move.canceled += OnMove;
+
+            inputActions.Player.Accelerate.performed += ctx => OnAccelerate(ctx);
+            inputActions.Player.Accelerate.canceled += ctx => OnAccelerate(ctx);
+
+            inputActions.Player.Brake.performed += ctx => OnBrake(ctx);
+            inputActions.Player.Brake.canceled += ctx => OnBrake(ctx);
 
             inputActions.Player.Sprint.performed += ctx => OnSprint(ctx);
             inputActions.Player.Sprint.canceled += ctx => OnSprint(ctx);
@@ -43,6 +57,8 @@ namespace SBPScripts
 
             inputActions.Player.Wheelie.performed += ctx => OnWheelie(ctx);
             inputActions.Player.Wheelie.canceled += ctx => OnWheelie(ctx);
+
+            Debug.Log("<color=green>BicycleInputBridge: Initialized with trigger support</color>");
         }
 
         void OnEnable()
@@ -62,66 +78,60 @@ namespace SBPScripts
 
         void ApplyInputToBicycle()
         {
-            // Apply deadzone
-            Vector2 processedInput = moveInput;
-            if (processedInput.magnitude < stickDeadzone)
+            // Process steering from left stick X only
+            float steerInput = moveInput.x;
+            if (Mathf.Abs(steerInput) < stickDeadzone)
             {
-                processedInput = Vector2.zero;
+                steerInput = 0f;
             }
 
-            // Boost steering input to overcome sensitivity issues
-            float boostedSteerInput = processedInput.x * steerSensitivityMultiplier;
+            // Boost steering
+            float boostedSteerInput = steerInput * steerSensitivityMultiplier;
             boostedSteerInput = Mathf.Clamp(boostedSteerInput, -1f, 1f);
 
-            // Apply movement
+            // Process triggers for acceleration/braking
+            // ZR (accelerate) = +1, ZL (brake) = -1
+            float targetAcceleration = 0f;
+            if (accelerateInput) targetAcceleration = 1f;
+            if (brakeInput) targetAcceleration = -1f;
+            // If both pressed, prioritize braking (safer)
+            if (accelerateInput && brakeInput) targetAcceleration = -1f;
+
+            // Smooth the acceleration for better feel (optional, but recommended)
+            smoothedAcceleration = Mathf.Lerp(smoothedAcceleration, targetAcceleration, Time.deltaTime * triggerSensitivity);
+
+            // Apply to bicycle controller
             CustomInput(boostedSteerInput, ref bicycleController.customSteerAxis, 5, 5, false);
-            CustomInput(processedInput.y, ref bicycleController.customAccelerationAxis, 1, 1, false);
+            CustomInput(smoothedAcceleration, ref bicycleController.customAccelerationAxis, 1, 1, false);
             CustomInput(boostedSteerInput, ref bicycleController.customLeanAxis, 1, 1, false);
-            CustomInput(processedInput.y, ref bicycleController.rawCustomAccelerationAxis, 1, 1, true);
+            CustomInput(smoothedAcceleration, ref bicycleController.rawCustomAccelerationAxis, 1, 1, true);
 
-            // DEBUG: Log what we're setting
-            if (Mathf.Abs(processedInput.x) > 0.1f || Mathf.Abs(processedInput.y) > 0.1f)
+            // Debug logging
+            if (showDebugLogs && (Mathf.Abs(steerInput) > 0.1f || Mathf.Abs(targetAcceleration) > 0.1f))
             {
-                Debug.Log($"<color=cyan>BRIDGE - Steer: {bicycleController.customSteerAxis:F2} | Accel: {bicycleController.customAccelerationAxis:F2} | Raw Input X: {moveInput.x:F2} → Boosted: {boostedSteerInput:F2}</color>");
+                Debug.Log($"<color=cyan>INPUT - Steer: {steerInput:F2} → Boosted: {boostedSteerInput:F2} | ZR: {accelerateInput} | ZL: {brakeInput}\n" +
+                         $"CONTROLLER - CustomSteer: {bicycleController.customSteerAxis:F2} | Accel: {bicycleController.customAccelerationAxis:F2} (Target: {targetAcceleration:F2})</color>");
             }
 
-            // Bunny hop state machine: 0 = nothing, 1 = held, -1 = just released
+            // Bunny hop state machine
             if (jumpInput && !wasJumpPressed)
-            {
                 bicycleController.bunnyHopInputState = 1;
-            }
             else if (!jumpInput && wasJumpPressed)
-            {
                 bicycleController.bunnyHopInputState = -1;
-            }
             else if (jumpInput)
-            {
                 bicycleController.bunnyHopInputState = 1;
-            }
             else
-            {
                 bicycleController.bunnyHopInputState = 0;
-            }
 
             wasJumpPressed = jumpInput;
-
-            // Simple boolean inputs - Note: BicycleController checks these in FixedUpdate
-            // Sprint is not a boolean in BicycleController, it's handled in ApplyCustomInput
-            // We need to access the private 'sprint' variable... let's use reflection or find another way
-
-            // Actually, looking at BicycleController line 440: sprint = Input.GetKey(KeyCode.LeftShift);
-            // This is still being set by old input! We need to override it
-
             bicycleController.wheelieInput = wheelieInput;
 
-            // DEBUG: Log button states
-            if (sprintInput || jumpInput || wheelieInput)
+            if (showDebugLogs && (jumpInput || wheelieInput || sprintInput))
             {
-                Debug.Log($"<color=yellow>BUTTONS - Sprint: {sprintInput} | Jump: {jumpInput} (HopState: {bicycleController.bunnyHopInputState}) | Wheelie: {wheelieInput}</color>");
+                Debug.Log($"<color=yellow>BUTTONS - Sprint: {sprintInput} | Jump: {jumpInput} (State: {bicycleController.bunnyHopInputState}) | Wheelie: {wheelieInput}</color>");
             }
         }
 
-        // Replicate the CustomInput method from BicycleController
         float CustomInput(float inputValue, ref float axis, float sensitivity, float gravity, bool isRaw)
         {
             float r = inputValue;
@@ -148,14 +158,34 @@ namespace SBPScripts
             moveInput = context.ReadValue<Vector2>();
         }
 
+        void OnAccelerate(InputAction.CallbackContext context)
+        {
+            if (context.performed)
+                accelerateInput = true;
+            else if (context.canceled)
+                accelerateInput = false;
+
+            if (showDebugLogs)
+                Debug.Log($"<color=lime>ZR (Accelerate): {accelerateInput}</color>");
+        }
+
+        void OnBrake(InputAction.CallbackContext context)
+        {
+            if (context.performed)
+                brakeInput = true;
+            else if (context.canceled)
+                brakeInput = false;
+
+            if (showDebugLogs)
+                Debug.Log($"<color=red>ZL (Brake): {brakeInput}</color>");
+        }
+
         void OnSprint(InputAction.CallbackContext context)
         {
             if (context.performed)
                 sprintInput = true;
             else if (context.canceled)
                 sprintInput = false;
-
-            Debug.Log($"<color=orange>Sprint: {sprintInput} | Phase: {context.phase}</color>");
         }
 
         void OnJump(InputAction.CallbackContext context)
@@ -164,8 +194,6 @@ namespace SBPScripts
                 jumpInput = true;
             else if (context.canceled)
                 jumpInput = false;
-
-            Debug.Log($"<color=green>Jump: {jumpInput} | Phase: {context.phase}</color>");
         }
 
         void OnWheelie(InputAction.CallbackContext context)
@@ -174,17 +202,20 @@ namespace SBPScripts
                 wheelieInput = true;
             else if (context.canceled)
                 wheelieInput = false;
-
-            Debug.Log($"<color=magenta>Wheelie: {wheelieInput} | Phase: {context.phase}</color>");
         }
 
         void OnDestroy()
         {
-            // Unsubscribe from events
             if (inputActions != null)
             {
                 inputActions.Player.Move.performed -= OnMove;
                 inputActions.Player.Move.canceled -= OnMove;
+
+                inputActions.Player.Accelerate.performed -= ctx => OnAccelerate(ctx);
+                inputActions.Player.Accelerate.canceled -= ctx => OnAccelerate(ctx);
+
+                inputActions.Player.Brake.performed -= ctx => OnBrake(ctx);
+                inputActions.Player.Brake.canceled -= ctx => OnBrake(ctx);
 
                 inputActions.Player.Sprint.performed -= ctx => OnSprint(ctx);
                 inputActions.Player.Sprint.canceled -= ctx => OnSprint(ctx);
