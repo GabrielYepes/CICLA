@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 991512ece8889fa45b0df4911a262e86
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 24100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Audio/BicycleAudioMixer.mixer
+  uploadId: 568948

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e8298fce2abff5444bc8153372f0de4f
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Basic MTB Setup/MTBRider2Setup.unity
+  uploadId: 568948

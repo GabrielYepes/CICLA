@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6b0f343b329374646b1af7c5ef884e31
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Freestyle Setup/StuntMode ReadMe.txt
+  uploadId: 568948

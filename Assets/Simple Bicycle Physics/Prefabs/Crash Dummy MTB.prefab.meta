@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2ff8ad09f48a67e42b714f72ee05996c
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Prefabs/Crash Dummy MTB.prefab
+  uploadId: 568948

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1fc1e0b3cd074864eab32a9846ea7a53
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Basic Cyclist Setup/BicycleStandardSetup.unity
+  uploadId: 568948

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2e8fa03739335f9428e0217af8c0b9fc
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Prefabs/Downhill Bicycle.prefab
+  uploadId: 568948

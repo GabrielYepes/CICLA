@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6ec93b7af69b1384dafad18b36e13240
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Editor/MtbBiker3Ragdoll.prefab
+  uploadId: 568948

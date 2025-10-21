@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 873f6a5d40ee42f418ce5e19dd8d4145
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Editor/CyclistSetup.cs
+  uploadId: 568948

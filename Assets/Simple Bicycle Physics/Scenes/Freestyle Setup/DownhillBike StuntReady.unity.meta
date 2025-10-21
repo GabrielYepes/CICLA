@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4bf3fa73e40aabc44879f8b9d7bb2790
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Freestyle Setup/DownhillBike StuntReady.unity
+  uploadId: 568948

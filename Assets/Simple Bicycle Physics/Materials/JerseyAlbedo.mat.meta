@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bf4ed618610d16348a06bea9b124328a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Materials/JerseyAlbedo.mat
+  uploadId: 568948

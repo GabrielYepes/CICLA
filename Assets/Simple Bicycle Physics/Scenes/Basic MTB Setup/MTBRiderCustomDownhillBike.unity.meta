@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6ae30f8a2253ae74fa22a220d0d8955f
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Basic MTB Setup/MTBRiderCustomDownhillBike.unity
+  uploadId: 568948

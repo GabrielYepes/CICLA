@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0c1c78c42dacb7e4d840d143b375a436
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Basic Cyclist Setup/TricycleSetup.unity
+  uploadId: 568948

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 51b987936c7231e458db405844650af8
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Prefabs/Fatbike.prefab
+  uploadId: 568948

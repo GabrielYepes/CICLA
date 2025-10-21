@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: defe66f4ef6fdf2409052cb8ac1a8473
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Basic Cyclist Setup/PennyFarthingSetup.unity
+  uploadId: 568948

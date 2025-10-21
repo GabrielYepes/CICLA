@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 949aee48a2c916a4995908f57a481777
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Basic Cyclist Setup/OffroadBicycleSetup.unity
+  uploadId: 568948
