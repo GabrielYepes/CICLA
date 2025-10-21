@@ -57,6 +57,8 @@ namespace SBPScripts
     }
     public class BicycleController : MonoBehaviour
     {
+        [Header("Input System")]
+        public bool useNewInputSystem = true;
         public CycleGeometry cycleGeometry;
         public GameObject fPhysicsWheel, rPhysicsWheel;
         public WheelFrictionSettings wheelFrictionSettings;
@@ -401,24 +403,29 @@ namespace SBPScripts
 
         void ApplyCustomInput()
         {
-            if (wayPointSystem.recordingState == WayPointSystem.RecordingState.DoNothing || wayPointSystem.recordingState == WayPointSystem.RecordingState.Record)
+
+            if (!useNewInputSystem) // Only use old input if toggled
             {
-                CustomInput("Horizontal", ref customSteerAxis, 5, 5, false);
-                CustomInput("Vertical", ref customAccelerationAxis, 1, 1, false);
-                CustomInput("Horizontal", ref customLeanAxis, 1, 1, false);
-                CustomInput("Vertical", ref rawCustomAccelerationAxis, 1, 1, true);
+                if (wayPointSystem.recordingState == WayPointSystem.RecordingState.DoNothing || wayPointSystem.recordingState == WayPointSystem.RecordingState.Record)
+                {
+                    CustomInput("Horizontal", ref customSteerAxis, 5, 5, false);
+                    CustomInput("Vertical", ref customAccelerationAxis, 1, 1, false);
+                    CustomInput("Horizontal", ref customLeanAxis, 1, 1, false);
+                    CustomInput("Vertical", ref rawCustomAccelerationAxis, 1, 1, true);
 
-                sprint = Input.GetKey(KeyCode.LeftShift);
+                    sprint = Input.GetKey(KeyCode.LeftShift);
 
-                wheelieInput = Input.GetKey(KeyCode.LeftControl);
+                    wheelieInput = Input.GetKey(KeyCode.LeftControl);
 
-                //Stateful Input - bunny hopping
-                if (Input.GetKey(KeyCode.Space))
-                    bunnyHopInputState = 1;
-                else if (Input.GetKeyUp(KeyCode.Space))
-                    bunnyHopInputState = -1;
-                else
-                    bunnyHopInputState = 0;
+                    //Stateful Input - bunny hopping
+                    if (Input.GetKey(KeyCode.Space))
+                        bunnyHopInputState = 1;
+                    else if (Input.GetKeyUp(KeyCode.Space))
+                        bunnyHopInputState = -1;
+                    else
+                        bunnyHopInputState = 0;
+                }
+            }
 
                 //Record
                 if (wayPointSystem.recordingState == WayPointSystem.RecordingState.Record)
@@ -432,7 +439,6 @@ namespace SBPScripts
                         wayPointSystem.bHopInstructionSet.Add(bunnyHopInputState);
                     }
                 }
-            }
 
             else
             {

@@ -150,20 +150,32 @@ namespace SBPScripts
 
         void OnSprint(InputAction.CallbackContext context)
         {
-            sprintInput = context.ReadValueAsButton();
-            Debug.Log($"<color=orange>Sprint callback: {sprintInput} | Phase: {context.phase}</color>");
+            if (context.performed)
+                sprintInput = true;
+            else if (context.canceled)
+                sprintInput = false;
+
+            Debug.Log($"<color=orange>Sprint: {sprintInput} | Phase: {context.phase}</color>");
         }
 
         void OnJump(InputAction.CallbackContext context)
         {
-            jumpInput = context.ReadValueAsButton();
-            Debug.Log($"<color=green>Jump callback: {jumpInput} | Phase: {context.phase}</color>");
+            if (context.performed)
+                jumpInput = true;
+            else if (context.canceled)
+                jumpInput = false;
+
+            Debug.Log($"<color=green>Jump: {jumpInput} | Phase: {context.phase}</color>");
         }
 
         void OnWheelie(InputAction.CallbackContext context)
         {
-            wheelieInput = context.ReadValueAsButton();
-            Debug.Log($"<color=magenta>Wheelie callback: {wheelieInput} | Phase: {context.phase}</color>");
+            if (context.performed)
+                wheelieInput = true;
+            else if (context.canceled)
+                wheelieInput = false;
+
+            Debug.Log($"<color=magenta>Wheelie: {wheelieInput} | Phase: {context.phase}</color>");
         }
 
         void OnDestroy()
