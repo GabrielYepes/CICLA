@@ -114,7 +114,9 @@ namespace SBPScripts
         RaycastHit hit;
         [HideInInspector]
         public float customSteerAxis, customLeanAxis, customAccelerationAxis, rawCustomAccelerationAxis;
-        bool isRaw, sprint;
+        bool isRaw;
+        [HideInInspector]
+        public bool sprint;  // Made public so BicycleInputBridge can set it
         [HideInInspector]
         public bool wheelieInput;
         [HideInInspector]

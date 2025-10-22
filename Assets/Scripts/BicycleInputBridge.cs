@@ -160,7 +160,10 @@ namespace SBPScripts
                 bicycleController.bunnyHopInputState = 0;
 
             wasJumpPressed = jumpInput;
+
+            // SET ALL BOOLEAN STATES
             bicycleController.wheelieInput = wheelieInput;
+            bicycleController.sprint = sprintInput;  // <--- THIS IS THE KEY LINE
 
             if (showDebugLogs && (jumpInput || wheelieInput || sprintInput))
             {
