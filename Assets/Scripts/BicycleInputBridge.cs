@@ -25,8 +25,21 @@ namespace SBPScripts
         public float stickDeadzone = 0.15f;
 
         [Header("Trigger Settings")]
-        [Tooltip("How fast triggers ramp up/down (higher = more responsive)")]
-        public float triggerSensitivity = 3f;
+        [Tooltip("How fast triggers ramp up when pressed")]
+        public float triggerPressSpeed = 3f;
+
+        [Tooltip("How fast triggers release (should be faster than press)")]
+        public float triggerReleaseSpeed = 9f;
+
+        [Tooltip("Threshold to snap to zero (prevents lingering values)")]
+        public float triggerSnapThreshold = 0.05f;
+
+        [Header("Steering")]
+        public bool smoothSteering = false;
+        [Range(1f, 20f)]
+        public float steeringSmoothSpeed = 10f;
+
+        private float smoothedSteer = 0f;
 
         [Header("Debug")]
         public bool showDebugLogs = true;
@@ -90,27 +103,50 @@ namespace SBPScripts
             boostedSteerInput = Mathf.Clamp(boostedSteerInput, -1f, 1f);
 
             // Process triggers for acceleration/braking
-            // ZR (accelerate) = +1, ZL (brake) = -1
             float targetAcceleration = 0f;
             if (accelerateInput) targetAcceleration = 1f;
             if (brakeInput) targetAcceleration = -1f;
-            // If both pressed, prioritize braking (safer)
             if (accelerateInput && brakeInput) targetAcceleration = -1f;
 
-            // Smooth the acceleration for better feel (optional, but recommended)
-            smoothedAcceleration = Mathf.Lerp(smoothedAcceleration, targetAcceleration, Time.deltaTime * triggerSensitivity);
+            // Smooth acceleration with different speeds for press vs release
+            float accelerationSpeed;
+            if (Mathf.Abs(targetAcceleration) > Mathf.Abs(smoothedAcceleration))
+            {
+                accelerationSpeed = triggerPressSpeed;
+            }
+            else
+            {
+                accelerationSpeed = triggerReleaseSpeed;
+            }
 
-            // Apply to bicycle controller
-            CustomInput(boostedSteerInput, ref bicycleController.customSteerAxis, 5, 5, false);
-            CustomInput(smoothedAcceleration, ref bicycleController.customAccelerationAxis, 1, 1, false);
-            CustomInput(boostedSteerInput, ref bicycleController.customLeanAxis, 1, 1, false);
-            CustomInput(smoothedAcceleration, ref bicycleController.rawCustomAccelerationAxis, 1, 1, true);
+            smoothedAcceleration = Mathf.Lerp(smoothedAcceleration, targetAcceleration, Time.deltaTime * accelerationSpeed);
+
+            if (Mathf.Abs(smoothedAcceleration) < triggerSnapThreshold && targetAcceleration == 0f)
+            {
+                smoothedAcceleration = 0f;
+            }
+
+            // DIRECT or SMOOTHED STEERING
+            if (smoothSteering)
+            {
+                smoothedSteer = Mathf.Lerp(smoothedSteer, boostedSteerInput, Time.deltaTime * steeringSmoothSpeed);
+                bicycleController.customSteerAxis = smoothedSteer;
+                bicycleController.customLeanAxis = smoothedSteer;
+            }
+            else
+            {
+                bicycleController.customSteerAxis = boostedSteerInput;
+                bicycleController.customLeanAxis = boostedSteerInput;
+            }
+
+            // SMOOTHED ACCELERATION - Now with proper release behavior
+            bicycleController.customAccelerationAxis = smoothedAcceleration;
+            bicycleController.rawCustomAccelerationAxis = smoothedAcceleration;
 
             // Debug logging
-            if (showDebugLogs && (Mathf.Abs(steerInput) > 0.1f || Mathf.Abs(targetAcceleration) > 0.1f))
+            if (showDebugLogs && (Mathf.Abs(steerInput) > 0.1f || Mathf.Abs(targetAcceleration) > 0.1f || Mathf.Abs(smoothedAcceleration) > 0.05f))
             {
-                Debug.Log($"<color=cyan>INPUT - Steer: {steerInput:F2} → Boosted: {boostedSteerInput:F2} | ZR: {accelerateInput} | ZL: {brakeInput}\n" +
-                         $"CONTROLLER - CustomSteer: {bicycleController.customSteerAxis:F2} | Accel: {bicycleController.customAccelerationAxis:F2} (Target: {targetAcceleration:F2})</color>");
+                Debug.Log($"<color=cyan>Steer: {bicycleController.customSteerAxis:F2} | Target Accel: {targetAcceleration:F2} → Smoothed: {smoothedAcceleration:F2} | ZR: {accelerateInput} ZL: {brakeInput}</color>");
             }
 
             // Bunny hop state machine

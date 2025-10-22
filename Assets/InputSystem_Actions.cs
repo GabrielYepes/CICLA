@@ -195,7 +195,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""1cb0b87e-5baa-4afe-aa05-9bc86222c346"",
-                    ""path"": ""<SwitchProControllerHID>/leftStickPress"",
+                    ""path"": ""<SwitchProControllerHID>/leftShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
