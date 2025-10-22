@@ -468,13 +468,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.51749736, y: 0.6957401, z: -0.49764642, w: 0.022142554}
+  m_LocalRotation: {x: 0.48149893, y: 0.7745738, z: -0.274082, w: 0.3050793}
   m_LocalPosition: {x: 0, y: 5.88, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 45.675, y: -136.129, z: -267.464}
+  m_LocalEulerAnglesHint: {x: 45.921, y: -197.456, z: -303.71}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -718,6 +718,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: oscillationAmount
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: inelasticCollision
       value: 0
       objectReference: {fileID: 0}
@@ -763,7 +767,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: steerAngle.m_Curve.Array.data[1].value
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: steerAngle.m_Curve.Array.data[0].inSlope
@@ -856,7 +860,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 1
   m_IsActive: 1
 --- !u!64 &1039182102
 MeshCollider:
@@ -903,7 +907,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 4d24d21d3c5e745468a7c7c034380bfa, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
