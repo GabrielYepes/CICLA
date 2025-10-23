@@ -128,10 +128,10 @@
                 },
                 {
                     "name": "",
-                    "id": "f813c539-79f2-49fa-9135-d0ab6fe5eec5",
-                    "path": "<SwitchProControllerHID>/rightStick",
+                    "id": "eeb76497-3de8-445e-afb4-019aea0dec89",
+                    "path": "<Gamepad>/rightStick",
                     "interactions": "",
-                    "processors": "StickDeadzone",
+                    "processors": "StickDeadzone,ScaleVector2(x=100,y=100)",
                     "groups": ";Gamepad",
                     "action": "Look",
                     "isComposite": false,
