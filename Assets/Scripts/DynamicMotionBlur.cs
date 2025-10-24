@@ -23,7 +23,7 @@ namespace SBPScripts
 
         [Header("Blur Settings")]
         [Tooltip("Maximum blur intensity (0-1)")]
-        [Range(0f, 1f)]
+        [Range(0f, 100f)]
         public float maxBlurIntensity = 0.5f;
 
         [Tooltip("How quickly blur fades in/out")]
@@ -38,14 +38,14 @@ namespace SBPScripts
         private float currentBlurIntensity = 0f;
 
         // URP Motion Blur (you'll need to add using statement if using URP)
-        // private UnityEngine.Rendering.Universal.MotionBlur motionBlur;
+        private UnityEngine.Rendering.Universal.MotionBlur motionBlur;
 
         void Start()
         {
             // Auto-find bicycle controller
             if (bicycleController == null)
             {
-                bicycleController = FindObjectOfType<BicycleController>();
+                bicycleController = Object.FindFirstObjectByType<BicycleController>(); 
                 if (bicycleController == null)
                 {
                     Debug.LogError("DynamicMotionBlur: No BicycleController found!");
@@ -57,10 +57,10 @@ namespace SBPScripts
             // Auto-find post-process volume if not assigned
             if (postProcessVolume == null)
             {
-                postProcessVolume = FindObjectOfType<Volume>();
+                postProcessVolume = Object.FindFirstObjectByType<Volume>();
             }
 
-            /* 
+             
             // Uncomment if using URP:
             if (postProcessVolume != null && postProcessVolume.profile != null)
             {
@@ -69,7 +69,7 @@ namespace SBPScripts
                     Debug.LogWarning("DynamicMotionBlur: No Motion Blur effect found in Volume Profile!");
                 }
             }
-            */
+            
         }
 
         void Update()
@@ -106,14 +106,14 @@ namespace SBPScripts
 
         void ApplyBlur(float intensity)
         {
-            /* 
+            
             // FOR URP - Uncomment this section and comment out the warning below:
             
             if (motionBlur != null)
             {
                 motionBlur.intensity.value = intensity;
             }
-            */
+            //*/
 
             /* 
             // FOR BUILT-IN PIPELINE - You'll need to add the Post-processing stack v2 package
