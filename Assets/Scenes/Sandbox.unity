@@ -639,6 +639,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 789653207}
   m_SourcePrefab: {fileID: 100100000, guid: f7cf3457f02876940809d5c554e0ef74, type: 3}
+--- !u!4 &564405098 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7298597664096063406, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+  m_PrefabInstance: {fileID: 1700713661}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &591271428 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 95019293cad0b964f8d9272ec2730518, type: 3}
@@ -892,6 +897,32 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 186861679914842178, guid: b17e5525707572842a9917629afcd1e1, type: 3}
   m_PrefabInstance: {fileID: 1700713661}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1018418080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1018418072}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51ed682fca3aac846827b0610fa26205, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visualBikeParent: {fileID: 564405098}
+  characterTransform: {fileID: 0}
+  extraVisualObjects: []
+  trickSpeed: 360
+  minTrickHeight: 1.5
+  frontflipPressed: 0
+  backflipPressed: 0
+  fastSnapSpeed: 15
+  mediumSnapSpeed: 8
+  slowSnapSpeed: 3
+  snap360Threshold: 20
+  allowSpins: 1
+  spinSpeed: 180
+  showDebug: 1
 --- !u!1 &1036554904
 GameObject:
   m_ObjectHideFlags: 0
@@ -1373,6 +1404,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1800165096458135753, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1800165096458135753, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+      propertyPath: showDebug
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3307148233659371437, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -1392,7 +1431,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3716333145644078608, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1018418080}
   m_SourcePrefab: {fileID: 100100000, guid: b17e5525707572842a9917629afcd1e1, type: 3}
 --- !u!1 &2000818794 stripped
 GameObject:

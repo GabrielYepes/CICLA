@@ -2,15 +2,18 @@
 using SBPScripts;
 
 /// <summary>
-/// Visual-Only Trick System with 360° Landing Snap
-/// Rotates the bike VISUAL meshes to perform tricks while physics remains stable.
-/// Features:
-/// - Smooth 360° increment snapping on landing (no counter-spinning)
-/// - Automatic reset to 0° after settling
-/// - Foundation for future trick tracking system
+/// Visual-Only Trick System v2 - Variable Landing Speed
+/// 
+/// Changes from v1:
+/// - Different landing speeds based on rotation angle
+/// - 360° spins: Fast snap (instant feel)
+/// - 180° spins: Slow smooth turn (no abrupt snap)
+/// - Other angles: Medium speed transition
+/// 
+/// This creates a more natural feel for different trick types.
 /// </summary>
 [RequireComponent(typeof(BicycleController))]
-public class VisualOnlyTricks : MonoBehaviour
+public class VisualOnlyTricks_v2 : MonoBehaviour
 {
     [Header("Required Setup")]
     [Tooltip("Drag your visual bike parent here (everything that should rotate during tricks)")]
@@ -36,10 +39,18 @@ public class VisualOnlyTricks : MonoBehaviour
     public bool frontflipPressed;
     public bool backflipPressed;
 
-    [Header("Landing Settings")]
-    [Tooltip("Snap to upright when landing (higher = faster)")]
-    [Range(1f, 20f)]
-    public float landingSnapSpeed = 10f;
+    [Header("Landing Settings - Variable Speed")]
+    [Tooltip("Fast snap for angles close to 0° or 360° (0-30°, 330-390°)")]
+    [Range(5f, 30f)]
+    public float fastSnapSpeed = 15f;
+
+    [Tooltip("Medium speed for moderate angles (30-150°, 210-330°)")]
+    [Range(3f, 15f)]
+    public float mediumSnapSpeed = 8f;
+
+    [Tooltip("Slow smooth turn for 180° region (150-210°)")]
+    [Range(1f, 8f)]
+    public float slowSnapSpeed = 3f;
 
     [Tooltip("Angle threshold for 360° snapping (±degrees)")]
     [Range(5f, 45f)]
@@ -67,6 +78,7 @@ public class VisualOnlyTricks : MonoBehaviour
     private bool wasAirborne = false;
     private float landingTargetAngle = 0f;
     private bool isSnappingToTarget = false;
+    private float currentLandingSpeed = 10f; // Dynamic landing speed
 
     void Start()
     {
@@ -74,7 +86,7 @@ public class VisualOnlyTricks : MonoBehaviour
 
         if (visualBikeParent == null)
         {
-            Debug.LogError("VisualOnlyTricks: Please assign Visual Bike Parent in inspector!");
+            Debug.LogError("VisualOnlyTricks_v2: Please assign Visual Bike Parent in inspector!");
             enabled = false;
             return;
         }
@@ -85,7 +97,7 @@ public class VisualOnlyTricks : MonoBehaviour
         // DISABLE the original freestyle system to avoid conflicts
         if (bikeController.airTimeSettings.freestyle)
         {
-            Debug.Log("<color=yellow>VisualOnlyTricks: Disabling original freestyle system</color>");
+            Debug.Log("<color=yellow>VisualOnlyTricks_v2: Disabling original freestyle system</color>");
             bikeController.airTimeSettings.freestyle = false;
         }
     }
@@ -132,12 +144,55 @@ public class VisualOnlyTricks : MonoBehaviour
     {
         // Calculate the target angle to snap to (nearest 360° increment)
         landingTargetAngle = FindNearestCleanAngle(currentYRotation);
+
+        // Calculate appropriate landing speed based on angle
+        currentLandingSpeed = CalculateLandingSpeed(currentYRotation);
+
         isSnappingToTarget = true;
 
         if (showDebug)
         {
-            Debug.Log($"<color=yellow>LANDING - Current: {currentYRotation:F1}°, Target: {landingTargetAngle:F1}°</color>");
+            string speedType = GetSpeedType(currentYRotation);
+            Debug.Log($"<color=yellow>LANDING - Current: {currentYRotation:F1}°, Target: {landingTargetAngle:F1}°, Speed: {speedType} ({currentLandingSpeed:F1})</color>");
         }
+    }
+
+    float CalculateLandingSpeed(float angle)
+    {
+        // Normalize angle to 0-360 range for categorization
+        float normalized = angle % 360f;
+        if (normalized < 0) normalized += 360f;
+
+        // Categorize based on angle ranges
+        if (normalized < 30f || normalized > 330f)
+        {
+            // Close to 0° or 360° - FAST snap
+            return fastSnapSpeed;
+        }
+        else if (normalized >= 150f && normalized <= 210f)
+        {
+            // Around 180° - SLOW smooth turn
+            return slowSnapSpeed;
+        }
+        else
+        {
+            // Everything else - MEDIUM speed
+            return mediumSnapSpeed;
+        }
+    }
+
+    string GetSpeedType(float angle)
+    {
+        // Helper for debug logging
+        float normalized = angle % 360f;
+        if (normalized < 0) normalized += 360f;
+
+        if (normalized < 30f || normalized > 330f)
+            return "FAST";
+        else if (normalized >= 150f && normalized <= 210f)
+            return "SLOW";
+        else
+            return "MEDIUM";
     }
 
     void HandleAirTricks()
@@ -211,14 +266,19 @@ public class VisualOnlyTricks : MonoBehaviour
     void HandleLanding()
     {
         // Smoothly return to upright for X rotation (frontflips/backflips)
-        currentXRotation = Mathf.Lerp(currentXRotation, 0f, Time.deltaTime * landingSnapSpeed);
+        // Always use fast speed for frontflip/backflip recovery
+        currentXRotation = Mathf.Lerp(currentXRotation, 0f, Time.deltaTime * fastSnapSpeed);
         isPerformingTrick = false;
 
-        // Handle Y rotation (spins) with 360° snapping
+        // Handle Y rotation (spins) with variable speed based on angle
         if (isSnappingToTarget)
         {
-            // Lerp toward target snap angle
-            currentYRotation = Mathf.Lerp(currentYRotation, landingTargetAngle, Time.deltaTime * landingSnapSpeed);
+            // Lerp toward target snap angle using calculated speed
+            currentYRotation = Mathf.Lerp(
+                currentYRotation,
+                landingTargetAngle,
+                Time.deltaTime * currentLandingSpeed
+            );
 
             // Once close enough to target, reset to 0°
             if (Mathf.Abs(currentYRotation - landingTargetAngle) < 1f)
@@ -236,8 +296,8 @@ public class VisualOnlyTricks : MonoBehaviour
         }
         else
         {
-            // Normal lerp to 0 if not snapping (for X rotation settling)
-            currentYRotation = Mathf.Lerp(currentYRotation, 0f, Time.deltaTime * landingSnapSpeed);
+            // Normal lerp to 0 if not snapping (shouldn't happen, but safety)
+            currentYRotation = Mathf.Lerp(currentYRotation, 0f, Time.deltaTime * mediumSnapSpeed);
         }
     }
 
@@ -262,9 +322,9 @@ public class VisualOnlyTricks : MonoBehaviour
         }
         else
         {
-            // Not close to a 360° increment - just return as-is
-            // This handles cases like 180° spins (which we don't snap)
-            return angle;
+            // Not close to a 360° increment - return 0 (will lerp smoothly)
+            // This handles 180° and other angles
+            return 0f;
         }
     }
 
@@ -343,10 +403,17 @@ public class VisualOnlyTricks : MonoBehaviour
             Gizmos.DrawWireSphere(transform.position, 1f);
         }
 
-        // Draw landing target indicator when on ground and snapping
+        // Draw landing speed indicator when on ground and snapping
         if (bikeController != null && !bikeController.isAirborne && isSnappingToTarget)
         {
-            Gizmos.color = Color.magenta;
+            // Color based on current landing speed
+            if (currentLandingSpeed > 12f)
+                Gizmos.color = Color.red;      // Fast
+            else if (currentLandingSpeed < 5f)
+                Gizmos.color = Color.blue;     // Slow
+            else
+                Gizmos.color = Color.yellow;   // Medium
+
             Gizmos.DrawWireSphere(transform.position + Vector3.up * 0.5f, 0.3f);
         }
     }
