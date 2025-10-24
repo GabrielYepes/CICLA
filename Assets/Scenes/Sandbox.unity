@@ -770,7 +770,7 @@ TerrainCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 633584523}
-  m_Material: {fileID: 13400000, guid: cbe0f5ce1b03d3347bcd95db93bf5965, type: 2}
+  m_Material: {fileID: 13400000, guid: 8b53211a4cd933447af79c8584317e86, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -973,6 +973,22 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784920, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: m_UseGravity
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784920, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: m_AngularDrag
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784920, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: m_Interpolate
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784920, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: m_IsKinematic
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: torque
       value: 40
@@ -980,6 +996,10 @@ PrefabInstance:
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: topSpeed
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: axisAngle
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: m_Enabled
@@ -1014,6 +1034,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: centerOfMassOffset.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: airTimeSettings.freestyle
       value: 1
       objectReference: {fileID: 0}
@@ -1035,11 +1059,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: wheelFrictionSettings.rFriction.x
-      value: 1
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: wheelFrictionSettings.rFriction.y
-      value: 0.75
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: airTimeSettings.groundSnapSensitivity
@@ -1047,11 +1071,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: leanCurve.m_Curve.Array.data[0].value
-      value: -30
+      value: -20
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: leanCurve.m_Curve.Array.data[2].value
-      value: 30
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: steerAngle.m_Curve.Array.data[0].value
@@ -1062,12 +1086,36 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: leanCurve.m_Curve.Array.data[0].inSlope
+      value: -0.00012354371
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: leanCurve.m_Curve.Array.data[2].inSlope
+      value: 0.00019414017
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: leanCurve.m_Curve.Array.data[0].outSlope
+      value: -0.00012354371
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: leanCurve.m_Curve.Array.data[2].inWeight
+      value: 0.4277777
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: leanCurve.m_Curve.Array.data[2].outSlope
+      value: 0.00019414017
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: steerAngle.m_Curve.Array.data[0].inSlope
       value: -0.011695106
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: steerAngle.m_Curve.Array.data[1].inSlope
       value: -0.00982666
+      objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      propertyPath: leanCurve.m_Curve.Array.data[0].outWeight
+      value: 0.67222226
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: steerAngle.m_Curve.Array.data[0].outSlope
@@ -1083,7 +1131,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: airTimeSettings.airTimeRotationSensitivity
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       propertyPath: steerAngle.m_Curve.Array.data[0].outWeight
@@ -1106,7 +1154,16 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 3716333145644078608, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 1387594105}
+    - targetCorrespondingSourceObject: {fileID: 3716333145644078608, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 1387594099}
+    - targetCorrespondingSourceObject: {fileID: 3716333145644078608, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1387594106}
+    - targetCorrespondingSourceObject: {fileID: 3716333145644078608, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1387594107}
   m_SourcePrefab: {fileID: 100100000, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
 --- !u!1 &789653203 stripped
 GameObject:
@@ -1135,6 +1192,11 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -7279836276797015771, guid: f7cf3457f02876940809d5c554e0ef74, type: 3}
+--- !u!1 &926248421 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4526251076937602736, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+  m_PrefabInstance: {fileID: 773856191}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1036554904
 GameObject:
   m_ObjectHideFlags: 0
@@ -1150,7 +1212,6 @@ GameObject:
   - component: {fileID: 1036554910}
   - component: {fileID: 1036554913}
   - component: {fileID: 1036554907}
-  - component: {fileID: 1036554915}
   - component: {fileID: 1036554916}
   - component: {fileID: 1036554917}
   m_Layer: 0
@@ -1457,14 +1518,6 @@ MonoBehaviour:
       Wait: 1
       Time: 0.5
     Restrictions: 0
---- !u!81 &1036554915
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1036554904}
-  m_Enabled: 1
 --- !u!114 &1036554916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1594,7 +1647,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1387594092}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0ef2865bfc336c43aa7ab3d25faa221, type: 3}
   m_Name: 
@@ -1618,6 +1671,79 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4324bb9ea5c33ce4e8cc74c3b9ff7d62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1387594105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1387594092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e37dc61a17e1d54ead25bd661aa0599, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enable: 0
+  fSuspension: {fileID: 926248421}
+  rSuspension: {fileID: 0}
+  frontSpring: 15000
+  frontDamper: 3000
+  rearSpring: 0
+  rearDamper: 0
+  chain: {fileID: 1514001874}
+  frontSuspensionMesh: {fileID: 1464074516}
+  spring: {fileID: 0}
+--- !u!114 &1387594106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1387594092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b88d4a17080e7f34ea0a749a50206ab7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steerSensitivityMultiplier: 5
+  stickDeadzone: 0.15
+  triggerPressSpeed: 3
+  triggerReleaseSpeed: 9
+  triggerSnapThreshold: 0.05
+  smoothSteering: 1
+  steeringSmoothSpeed: 10
+  preventAccelTricks: 1
+  showDebugLogs: 0
+--- !u!114 &1387594107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1387594092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe8741013ddcffc4ca8c273bcc9354bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frontflipInput: 1
+  backflipInput: 1
+  assistedTricks: 1
+  trickRotationSpeed: 360
+  stabilizationAmount: 0.7
+  minTrickHeight: 2
+  visualBikeTransform: {fileID: 0}
+  showDebugInfo: 0
+--- !u!1 &1464074516 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7439184344371964929, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+  m_PrefabInstance: {fileID: 773856191}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1514001874 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2559894152251620723, guid: 3ab47840993e3924eb6621b3fdf90428, type: 3}
+  m_PrefabInstance: {fileID: 773856191}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2000818794 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 70981e557d181f34293152b90460f4c8, type: 3}
