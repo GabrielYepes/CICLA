@@ -1767,7 +1767,7 @@ GameObject:
   - component: {fileID: 7763693495198784920}
   - component: {fileID: 7763693495198784921}
   - component: {fileID: 1119685889717728182}
-  - component: {fileID: 1800165096458135753}
+  - component: {fileID: 7322583432936076820}
   m_Layer: 0
   m_Name: Biycycle Experimental
   m_TagString: Untagged
@@ -2024,9 +2024,9 @@ MonoBehaviour:
     bHopInstructionSet: 
   airTimeSettings:
     freestyle: 0
-    airTimeRotationSensitivity: 0
-    heightThreshold: 0.5
-    groundSnapSensitivity: 0
+    airTimeRotationSensitivity: 1
+    heightThreshold: 1.5
+    groundSnapSensitivity: 2
 --- !u!114 &1119685889717728182
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2047,7 +2047,7 @@ MonoBehaviour:
   smoothSteering: 1
   steeringSmoothSpeed: 10
   showDebugLogs: 0
---- !u!114 &1800165096458135753
+--- !u!114 &7322583432936076820
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2056,19 +2056,25 @@ MonoBehaviour:
   m_GameObject: {fileID: 3716333145644078608}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19a1e2bb45dc31b47aa1ae74792ab639, type: 3}
+  m_Script: {fileID: 11500000, guid: b699923168e1fa443a112c66a5ae3d45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   visualBikeParent: {fileID: 7298597664096063406}
   characterTransform: {fileID: 0}
   extraVisualObjects: []
   trickSpeed: 360
-  minTrickHeight: 2
+  minAirTimeForTricks: 0.5
+  useTrajectoryPrediction: 1
+  minTrickHeight: 2.5
   frontflipPressed: 0
   backflipPressed: 0
-  landingSnapSpeed: 10
+  enableAngleSnapping: 1
+  snap360Threshold: 20
+  fastSnapSpeed: 15
+  mediumSnapSpeed: 8
+  slowSnapSpeed: 3
   allowSpins: 1
-  spinSpeed: 180
+  spinSpeed: 360
   showDebug: 0
 --- !u!1 &3791339719506743959
 GameObject:

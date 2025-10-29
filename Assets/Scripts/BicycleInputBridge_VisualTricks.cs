@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace SBPScripts
@@ -11,7 +11,7 @@ namespace SBPScripts
     public class BicycleInputBridge_VisualTricks : MonoBehaviour
     {
         private BicycleController bicycleController;
-        private VisualOnlyTricks trickSystem;
+        private VisualOnlyTricks_v2_Trajectory trickSystem;
         private InputSystem_Actions inputActions;
 
         // Input values
@@ -50,11 +50,11 @@ namespace SBPScripts
         void Awake()
         {
             bicycleController = GetComponent<BicycleController>();
-            trickSystem = GetComponent<VisualOnlyTricks>();
-            
+            trickSystem = GetComponent<VisualOnlyTricks_v2_Trajectory>();  // ← Use v2_Trajectory type!
+
             if (trickSystem == null)
             {
-                Debug.LogWarning("VisualOnlyTricks not found! Tricks won't work.");
+                Debug.LogWarning("VisualOnlyTricks_v2_Trajectory not found! Tricks won't work.");
             }
 
             inputActions = new InputSystem_Actions();
@@ -78,12 +78,12 @@ namespace SBPScripts
             inputActions.Player.Wheelie.performed += ctx => OnWheelie(ctx);
             inputActions.Player.Wheelie.canceled += ctx => OnWheelie(ctx);
 
-            // TRICK BUTTONS - Using Previous (X) and Crouch (Y)
-            inputActions.Player.Previous.performed += ctx => OnFrontflip(ctx);
-            inputActions.Player.Previous.canceled += ctx => OnFrontflip(ctx);
+            // TRICK BUTTONS - FIXED! Using FrontFlip and BackFlip actions
+            inputActions.Player.FrontFlip.performed += ctx => OnFrontflip(ctx);  // ← CHANGED!
+            inputActions.Player.FrontFlip.canceled += ctx => OnFrontflip(ctx);   // ← CHANGED!
 
-            inputActions.Player.Crouch.performed += ctx => OnBackflip(ctx);
-            inputActions.Player.Crouch.canceled += ctx => OnBackflip(ctx);
+            inputActions.Player.BackFlip.performed += ctx => OnBackflip(ctx);    // ← CHANGED!
+            inputActions.Player.BackFlip.canceled += ctx => OnBackflip(ctx);     // ← CHANGED!
 
             Debug.Log("<color=green>BicycleInputBridge_VisualTricks: Initialized</color>");
         }
@@ -211,14 +211,24 @@ namespace SBPScripts
 
         void OnFrontflip(InputAction.CallbackContext context)
         {
-            frontflipInput = context.performed;
-            if (showDebugLogs) Debug.Log($"<color=cyan>X Button (Frontflip): {frontflipInput}</color>");
+            if (context.performed)
+                frontflipInput = true;
+            else if (context.canceled)
+                frontflipInput = false;
+
+            if (showDebugLogs)
+                Debug.Log($"<color=cyan>X Button (Frontflip): {frontflipInput}</color>");
         }
 
         void OnBackflip(InputAction.CallbackContext context)
         {
-            backflipInput = context.performed;
-            if (showDebugLogs) Debug.Log($"<color=cyan>Y Button (Backflip): {backflipInput}</color>");
+            if (context.performed)
+                backflipInput = true;
+            else if (context.canceled)
+                backflipInput = false;
+
+            if (showDebugLogs)
+                Debug.Log($"<color=cyan>B Button (Backflip): {backflipInput}</color>");
         }
 
         void OnDestroy()
@@ -237,10 +247,12 @@ namespace SBPScripts
                 inputActions.Player.Jump.canceled -= ctx => OnJump(ctx);
                 inputActions.Player.Wheelie.performed -= ctx => OnWheelie(ctx);
                 inputActions.Player.Wheelie.canceled -= ctx => OnWheelie(ctx);
-                inputActions.Player.Previous.performed -= ctx => OnFrontflip(ctx);
-                inputActions.Player.Previous.canceled -= ctx => OnFrontflip(ctx);
-                inputActions.Player.Crouch.performed -= ctx => OnBackflip(ctx);
-                inputActions.Player.Crouch.canceled -= ctx => OnBackflip(ctx);
+
+                // FIXED! Unsubscribe from FrontFlip and BackFlip
+                inputActions.Player.FrontFlip.performed -= ctx => OnFrontflip(ctx);   // ← CHANGED!
+                inputActions.Player.FrontFlip.canceled -= ctx => OnFrontflip(ctx);    // ← CHANGED!
+                inputActions.Player.BackFlip.performed -= ctx => OnBackflip(ctx);     // ← CHANGED!
+                inputActions.Player.BackFlip.canceled -= ctx => OnBackflip(ctx);      // ← CHANGED!
             }
         }
     }

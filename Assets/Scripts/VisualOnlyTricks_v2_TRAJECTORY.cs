@@ -2,18 +2,17 @@
 using SBPScripts;
 
 /// <summary>
-/// Visual-Only Trick System v2 - Variable Landing Speed
+/// Visual-Only Trick System v2 - Trajectory Prediction
 /// 
-/// Changes from v1:
-/// - Different landing speeds based on rotation angle
-/// - 360° spins: Fast snap (instant feel)
-/// - 180° spins: Slow smooth turn (no abrupt snap)
-/// - Other angles: Medium speed transition
+/// New Features:
+/// - Trajectory-based trick detection (predicts air time on takeoff)
+/// - Toggleable angle snapping system
+/// - Enhanced debug info showing trick availability
 /// 
-/// This creates a more natural feel for different trick types.
+/// No more raycast issues with obstacles or complex terrain!
 /// </summary>
 [RequireComponent(typeof(BicycleController))]
-public class VisualOnlyTricks_v2 : MonoBehaviour
+public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
 {
     [Header("Required Setup")]
     [Tooltip("Drag your visual bike parent here (everything that should rotate during tricks)")]
@@ -31,13 +30,29 @@ public class VisualOnlyTricks_v2 : MonoBehaviour
     [Range(180f, 720f)]
     public float trickSpeed = 360f;
 
-    [Tooltip("Minimum height above ground to perform tricks")]
+    [Header("Trick Detection - Trajectory Prediction")]
+    [Tooltip("Minimum predicted air time required to allow tricks (seconds)")]
+    [Range(0.1f, 2f)]
+    public float minAirTimeForTricks = 0.5f;
+
+    [Tooltip("Use predicted trajectory instead of height check")]
+    public bool useTrajectoryPrediction = true;
+
+    [Tooltip("Fallback: minimum height for tricks (used if trajectory prediction disabled)")]
     [Range(1f, 10f)]
     public float minTrickHeight = 2.5f;
 
     [Header("Input (Set by Input Bridge)")]
     public bool frontflipPressed;
     public bool backflipPressed;
+
+    [Header("Landing Settings - Angle Snapping")]
+    [Tooltip("Enable 360° angle snapping on landing")]
+    public bool enableAngleSnapping = true;
+
+    [Tooltip("Angle threshold for 360° snapping (±degrees)")]
+    [Range(5f, 45f)]
+    public float snap360Threshold = 20f;
 
     [Header("Landing Settings - Variable Speed")]
     [Tooltip("Fast snap for angles close to 0° or 360° (0-30°, 330-390°)")]
@@ -52,10 +67,6 @@ public class VisualOnlyTricks_v2 : MonoBehaviour
     [Range(1f, 8f)]
     public float slowSnapSpeed = 3f;
 
-    [Tooltip("Angle threshold for 360° snapping (±degrees)")]
-    [Range(5f, 45f)]
-    public float snap360Threshold = 20f;
-
     [Header("Spins")]
     [Tooltip("Allow spins with L-stick in the air")]
     public bool allowSpins = true;
@@ -68,6 +79,7 @@ public class VisualOnlyTricks_v2 : MonoBehaviour
 
     // Internal state
     private BicycleController bikeController;
+    private Rigidbody rb;
     private float currentXRotation = 0f;  // Frontflip/backflip rotation
     private float currentYRotation = 0f;  // Spin rotation
     private float targetXRotation = 0f;
@@ -80,15 +92,27 @@ public class VisualOnlyTricks_v2 : MonoBehaviour
     private bool isSnappingToTarget = false;
     private float currentLandingSpeed = 10f; // Dynamic landing speed
 
+    // Trajectory prediction state
+    private bool tricksAllowedThisJump = false;
+    private float predictedAirTime = 0f;
+    private float takeoffTime = 0f;
+
     void Start()
     {
         bikeController = GetComponent<BicycleController>();
+        rb = GetComponent<Rigidbody>();
 
         if (visualBikeParent == null)
         {
-            Debug.LogError("VisualOnlyTricks_v2: Please assign Visual Bike Parent in inspector!");
+            Debug.LogError("VisualOnlyTricks_v2_Trajectory: Please assign Visual Bike Parent in inspector!");
             enabled = false;
             return;
+        }
+
+        if (rb == null)
+        {
+            Debug.LogError("VisualOnlyTricks_v2_Trajectory: Rigidbody not found! Trajectory prediction requires Rigidbody.");
+            useTrajectoryPrediction = false;
         }
 
         // Store initial rotation
@@ -97,7 +121,7 @@ public class VisualOnlyTricks_v2 : MonoBehaviour
         // DISABLE the original freestyle system to avoid conflicts
         if (bikeController.airTimeSettings.freestyle)
         {
-            Debug.Log("<color=yellow>VisualOnlyTricks_v2: Disabling original freestyle system</color>");
+            Debug.Log("<color=yellow>VisualOnlyTricks_v2_Trajectory: Disabling original freestyle system</color>");
             bikeController.airTimeSettings.freestyle = false;
         }
     }
@@ -134,26 +158,104 @@ public class VisualOnlyTricks_v2 : MonoBehaviour
 
     void OnTakeoff()
     {
-        if (showDebug) Debug.Log("<color=green>TAKEOFF - Rotation reset to 0°</color>");
-        // Ensure we start fresh (in case we didn't fully settle)
+        if (showDebug) Debug.Log("<color=green>═══ TAKEOFF ═══</color>");
+
+        // Reset rotation for new jump
         currentYRotation = 0f;
         isSnappingToTarget = false;
+        takeoffTime = Time.time;
+
+        // Predict if this jump allows tricks
+        if (useTrajectoryPrediction && rb != null)
+        {
+            predictedAirTime = CalculatePredictedAirTime();
+            tricksAllowedThisJump = predictedAirTime >= minAirTimeForTricks;
+
+            if (showDebug)
+            {
+                string statusColor = tricksAllowedThisJump ? "cyan" : "red";
+                string status = tricksAllowedThisJump ? "ALLOWED ✓" : "BLOCKED ✗";
+                Debug.Log($"<color={statusColor}>Predicted air time: {predictedAirTime:F2}s</color>");
+                Debug.Log($"<color={statusColor}>Tricks: {status}</color>");
+            }
+        }
+        else
+        {
+            // Fallback to always allowing tricks if prediction disabled
+            tricksAllowedThisJump = true;
+            if (showDebug) Debug.Log("<color=yellow>Trajectory prediction disabled - tricks allowed by default</color>");
+        }
+    }
+
+    float CalculatePredictedAirTime()
+    {
+        // Get current upward velocity
+        float upwardVelocity = rb.linearVelocity.y;
+
+        // If moving downward already, we're probably falling (shouldn't happen at takeoff but safety check)
+        if (upwardVelocity <= 0)
+        {
+            return 0f;
+        }
+
+        // Get current height above ground (for more accurate calculation)
+        float currentHeight = GetHeightAboveGround();
+
+        // Physics calculations:
+        // Time to reach apex: t = v / g
+        float gravity = -Physics.gravity.y; // Make positive for calculations
+        float timeToApex = upwardVelocity / gravity;
+
+        // Maximum height above current position: h = v² / (2g)
+        float additionalHeight = (upwardVelocity * upwardVelocity) / (2f * gravity);
+
+        // Total height at apex
+        float totalApexHeight = currentHeight + additionalHeight;
+
+        // Time to fall from apex back to ground: t = sqrt(2h / g)
+        float timeToGround = Mathf.Sqrt((2f * totalApexHeight) / gravity);
+
+        // Total predicted air time
+        float totalAirTime = timeToApex + timeToGround;
+
+        return totalAirTime;
     }
 
     void OnLanding()
     {
-        // Calculate the target angle to snap to (nearest 360° increment)
-        landingTargetAngle = FindNearestCleanAngle(currentYRotation);
+        if (showDebug) Debug.Log("<color=yellow>═══ LANDING ═══</color>");
 
-        // Calculate appropriate landing speed based on angle
-        currentLandingSpeed = CalculateLandingSpeed(currentYRotation);
+        // Reset trick permission
+        tricksAllowedThisJump = false;
 
-        isSnappingToTarget = true;
-
-        if (showDebug)
+        // Handle angle snapping if enabled
+        if (enableAngleSnapping)
         {
-            string speedType = GetSpeedType(currentYRotation);
-            Debug.Log($"<color=yellow>LANDING - Current: {currentYRotation:F1}°, Target: {landingTargetAngle:F1}°, Speed: {speedType} ({currentLandingSpeed:F1})</color>");
+            // Calculate the target angle to snap to (nearest 360° increment)
+            landingTargetAngle = FindNearestCleanAngle(currentYRotation);
+
+            // Calculate appropriate landing speed based on angle
+            currentLandingSpeed = CalculateLandingSpeed(currentYRotation);
+
+            isSnappingToTarget = true;
+
+            if (showDebug)
+            {
+                string speedType = GetSpeedType(currentYRotation);
+                Debug.Log($"<color=yellow>Current: {currentYRotation:F1}°, Target: {landingTargetAngle:F1}°, Speed: {speedType} ({currentLandingSpeed:F1})</color>");
+            }
+        }
+        else
+        {
+            // No snapping - just lerp to 0
+            landingTargetAngle = 0f;
+            currentLandingSpeed = mediumSnapSpeed;
+            isSnappingToTarget = true;
+
+            if (showDebug)
+            {
+                Debug.Log($"<color=yellow>Angle snapping disabled - lerping to 0° at medium speed</color>");
+            }
         }
     }
 
@@ -197,12 +299,33 @@ public class VisualOnlyTricks_v2 : MonoBehaviour
 
     void HandleAirTricks()
     {
-        float heightAboveGround = GetHeightAboveGround();
-
-        // Too low for tricks
-        if (heightAboveGround < minTrickHeight)
+        // Check if tricks are allowed this jump
+        if (useTrajectoryPrediction)
         {
-            return;
+            // Use predicted trajectory
+            if (!tricksAllowedThisJump)
+            {
+                // Fallback: If we've been in air longer than predicted, allow tricks anyway
+                float actualAirTime = Time.time - takeoffTime;
+                if (actualAirTime > predictedAirTime && actualAirTime > minAirTimeForTricks)
+                {
+                    tricksAllowedThisJump = true;
+                    if (showDebug) Debug.Log("<color=green>Air time exceeded prediction - tricks now allowed!</color>");
+                }
+                else
+                {
+                    return; // Block tricks
+                }
+            }
+        }
+        else
+        {
+            // Fallback to height-based detection
+            float heightAboveGround = GetHeightAboveGround();
+            if (heightAboveGround < minTrickHeight)
+            {
+                return; // Too low for tricks
+            }
         }
 
         // FRONTFLIP - Press X button
@@ -401,34 +524,40 @@ public class VisualOnlyTricks_v2 : MonoBehaviour
     public float CurrentRotation => currentYRotation;
     public bool IsAirborne => bikeController.isAirborne;
     public bool IsPerformingTrick => isPerformingTrick;
+    public bool TricksAllowed => tricksAllowedThisJump;
+    public float PredictedAirTime => predictedAirTime;
 
     // Debug gizmos
     void OnDrawGizmos()
     {
         if (!showDebug || !Application.isPlaying) return;
 
-        // Draw height threshold sphere
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position - Vector3.up * minTrickHeight, 0.5f);
-
         // Draw current state
         if (bikeController != null && bikeController.isAirborne)
         {
-            Gizmos.color = isPerformingTrick ? Color.cyan : Color.green;
+            // Color based on trick availability
+            if (tricksAllowedThisJump)
+                Gizmos.color = isPerformingTrick ? Color.cyan : Color.green; // Tricks allowed
+            else
+                Gizmos.color = Color.red; // Tricks blocked
+
             Gizmos.DrawWireSphere(transform.position, 1f);
 
-            // Draw raycast line in Scene view
-            float height = GetHeightAboveGround();
-            Vector3 groundPoint = transform.position + Vector3.down * height;
+            // Draw raycast line in Scene view (if using height fallback)
+            if (!useTrajectoryPrediction)
+            {
+                float height = GetHeightAboveGround();
+                Vector3 groundPoint = transform.position + Vector3.down * height;
 
-            // Color based on whether tricks are allowed
-            if (height < minTrickHeight)
-                Gizmos.color = Color.red; // Too low for tricks
-            else
-                Gizmos.color = Color.green; // Tricks allowed
+                // Color based on whether tricks are allowed
+                if (height < minTrickHeight)
+                    Gizmos.color = Color.red; // Too low for tricks
+                else
+                    Gizmos.color = Color.green; // Tricks allowed
 
-            Gizmos.DrawLine(transform.position, groundPoint);
-            Gizmos.DrawSphere(groundPoint, 0.3f);
+                Gizmos.DrawLine(transform.position, groundPoint);
+                Gizmos.DrawSphere(groundPoint, 0.3f);
+            }
         }
 
         // Draw landing speed indicator when on ground and snapping

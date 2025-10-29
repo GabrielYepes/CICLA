@@ -291,11 +291,33 @@
                 },
                 {
                     "name": "",
+                    "id": "32eeb626-44a1-4bb2-9704-bf36dace9848",
+                    "path": "<Keyboard>/m",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse;Gamepad",
+                    "action": "FrontFlip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "bd04a561-be13-4301-b51c-7c741196f310",
                     "path": "<SwitchProControllerHID>/buttonSouth",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
+                    "action": "BackFlip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "56637974-f7f8-46c0-844a-e585a308c314",
+                    "path": "<Keyboard>/n",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse;Gamepad",
                     "action": "BackFlip",
                     "isComposite": false,
                     "isPartOfComposite": false
