@@ -403,17 +403,22 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
                 Time.deltaTime * currentLandingSpeed
             );
 
-            // Once close enough to target, reset to 0°
+            // When landing is complete:
             if (Mathf.Abs(currentYRotation - landingTargetAngle) < 1f)
             {
-                // Since 360° = 0° visually, we can just set to 0
                 currentYRotation = 0f;
                 landingTargetAngle = 0f;
                 isSnappingToTarget = false;
 
+                // FORCE-RESET to exact zero (prevents tiny floating point errors)
+                if (visualBikeParent != null)
+                {
+                    visualBikeParent.localRotation = Quaternion.identity;  // ← ADD THIS!
+                }
+
                 if (showDebug)
                 {
-                    Debug.Log("<color=green>Landing complete - Reset to 0°</color>");
+                    Debug.Log("<color=green>Landing complete - FORCED to identity</color>");
                 }
             }
         }
