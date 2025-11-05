@@ -576,6 +576,31 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+--- !u!1 &413497912 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3716333145644078608, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+  m_PrefabInstance: {fileID: 1434098360}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &413497913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 413497912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 726ca29beca159e45bef2403e00dbcc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isGrinding: 0
+  grindSpeed: 8
+  heightOffset: 0.5
+  lerpSpeed: 10
+  exitForceMultiplier: 1.5
+  allowJumpOffRail: 1
+  rPhysicsWheel: {fileID: 1114399618}
+  showDebug: 0
 --- !u!1001 &473502260
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1315,7 +1340,7 @@ GameObject:
   - component: {fileID: 1108642343}
   m_Layer: 0
   m_Name: Spline
-  m_TagString: Untagged
+  m_TagString: Rail
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1884,8 +1909,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   normalDir: 0
+  showDebug: 0
+  drawGizmos: 1
   railSpline: {fileID: 1108642337}
-  totalSplineLength: 0
+  totalSplineLength: 148.34564
+--- !u!1 &1114399618 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4526251076611362504, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+  m_PrefabInstance: {fileID: 1434098360}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1311758205 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c3534b3902eb20e48a9f518de24a4aec, type: 3}
@@ -2021,6 +2053,10 @@ PrefabInstance:
       propertyPath: showDebug
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784919, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7763693495198784921, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -2028,7 +2064,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3716333145644078608, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 413497913}
   m_SourcePrefab: {fileID: 100100000, guid: b17e5525707572842a9917629afcd1e1, type: 3}
 --- !u!1 &2000818794 stripped
 GameObject:

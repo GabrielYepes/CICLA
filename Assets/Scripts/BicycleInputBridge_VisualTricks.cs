@@ -13,6 +13,7 @@ namespace SBPScripts
         private BicycleController bicycleController;
         private VisualOnlyTricks_v2_Trajectory trickSystem;
         private InputSystem_Actions inputActions;
+        private BikeGrindController grindController;
 
         // Input values
         private Vector2 moveInput;
@@ -51,6 +52,7 @@ namespace SBPScripts
         {
             bicycleController = GetComponent<BicycleController>();
             trickSystem = GetComponent<VisualOnlyTricks_v2_Trajectory>();  // ← Use v2_Trajectory type!
+            grindController = GetComponent<BikeGrindController>();
 
             if (trickSystem == null)
             {
@@ -58,6 +60,11 @@ namespace SBPScripts
             }
 
             inputActions = new InputSystem_Actions();
+
+            if (grindController == null)
+            {
+                Debug.LogWarning("BikeGrindController not found! Grinding won't work.");
+            }
 
             // Subscribe to all inputs
             inputActions.Player.Move.performed += OnMove;
@@ -160,9 +167,22 @@ namespace SBPScripts
 
             wasJumpPressed = jumpInput;
 
+            // GRINDING - Forward jump input to grind controller
+            if (grindController != null)
+            {
+                grindController.HandleJumpInput(jumpInput);
+            }
+
             // OTHER BUTTONS
             bicycleController.wheelieInput = wheelieInput;
             bicycleController.sprint = sprintInput;
+
+            // Don't allow tricks while grinding (OPTIONAL)
+            if (grindController != null && grindController.IsGrinding)
+            {
+                frontflipInput = false;
+                backflipInput = false;
+            }
 
             // TRICK BUTTONS - Pass to trick system
             if (trickSystem != null)
