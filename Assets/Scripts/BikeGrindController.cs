@@ -120,6 +120,12 @@ namespace SBPScripts
         {
             if (isGrinding)
             {
+                // Keep grounded state during entire grind (prevents tricks, maintains proper animations)
+                if (bicycleController != null)
+                {
+                    bicycleController.isAirborne = false;
+                }
+
                 MoveAlongRail();
             }
         }
@@ -197,11 +203,17 @@ namespace SBPScripts
             if (rWheelRb != null)
                 rWheelRb.isKinematic = true;
 
+            // Force grounded state to prevent tricks during grind
+            if (bicycleController != null)
+            {
+                bicycleController.isAirborne = false;
+            }
+
             // Disable bicycle controller temporarily
             if (bicycleController != null)
                 bicycleController.enabled = false;
 
-            if (showDebug) Debug.Log("<color=yellow>Physics suspended for grind</color>");
+            if (showDebug) Debug.Log("<color=yellow>Physics suspended for grind (isAirborne = false)</color>");
         }
 
         private void ResumePhysics()
