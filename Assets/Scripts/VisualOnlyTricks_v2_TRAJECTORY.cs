@@ -8,6 +8,10 @@ using SBPScripts;
 /// - Trajectory-based trick detection (predicts air time on takeoff)
 /// - Toggleable angle snapping system
 /// - Enhanced debug info showing trick availability
+/// - 360° snapping for BOTH frontflips/backflips AND spins
+/// - Velocity-based trick speeds (faster flips/spins when riding fast)
+/// - Direction-aware landing snapping (completes rotation in current direction)
+/// - Post-landing cooldown (prevents accidental tricks during bounce)
 /// 
 /// No more raycast issues with obstacles or complex terrain!
 /// </summary>
@@ -26,9 +30,16 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
     public Transform[] extraVisualObjects;
 
     [Header("Trick Settings")]
-    [Tooltip("How fast tricks rotate (degrees per second)")]
+    [Tooltip("Base rotation speed for flips (degrees per second)")]
     [Range(180f, 720f)]
-    public float trickSpeed = 360f;
+    public float baseTrickSpeed = 360f;
+
+    [Tooltip("Enable velocity-based speed for flips")]
+    public bool useVelocityForFlips = true;
+
+    [Tooltip("Velocity influence on flip speed (0 = no influence, 1 = double speed at max velocity)")]
+    [Range(0f, 2f)]
+    public float flipVelocityMultiplier = 0.5f;
 
     [Header("Trick Detection - Trajectory Prediction")]
     [Tooltip("Minimum predicted air time required to allow tricks (seconds)")]
@@ -54,6 +65,10 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
     [Range(5f, 45f)]
     public float snap360Threshold = 20f;
 
+    [Tooltip("Cooldown after landing before tricks are allowed again (prevents accidental bounce tricks)")]
+    [Range(0f, 1f)]
+    public float postLandingCooldown = 0.3f;
+
     [Header("Landing Settings - Variable Speed")]
     [Tooltip("Fast snap for angles close to 0° or 360° (0-30°, 330-390°)")]
     [Range(5f, 30f)]
@@ -71,8 +86,24 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
     [Tooltip("Allow spins with L-stick in the air")]
     public bool allowSpins = true;
 
+    [Tooltip("Base rotation speed for spins (degrees per second)")]
     [Range(90f, 360f)]
-    public float spinSpeed = 180f;
+    public float baseSpinSpeed = 180f;
+
+    [Tooltip("Enable velocity-based speed for spins")]
+    public bool useVelocityForSpins = true;
+
+    [Tooltip("Velocity influence on spin speed (0 = no influence, 1 = double speed at max velocity)")]
+    [Range(0f, 2f)]
+    public float spinVelocityMultiplier = 0.3f;
+
+    [Header("Velocity Settings")]
+    [Tooltip("Reference velocity for max speed bonus (typically max bike speed)")]
+    [Range(10f, 50f)]
+    public float referenceVelocity = 25f;
+
+    [Tooltip("Show velocity debug info")]
+    public bool showVelocityDebug = false;
 
     [Header("Debug")]
     public bool showDebug = false;
@@ -88,7 +119,8 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
 
     // Landing state
     private bool wasAirborne = false;
-    private float landingTargetAngle = 0f;
+    private float landingTargetAngleX = 0f;  // Target for frontflips/backflips
+    private float landingTargetAngleY = 0f;  // Target for spins
     private bool isSnappingToTarget = false;
     private float currentLandingSpeed = 10f; // Dynamic landing speed
 
@@ -96,6 +128,10 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
     private bool tricksAllowedThisJump = false;
     private float predictedAirTime = 0f;
     private float takeoffTime = 0f;
+
+    // Post-landing cooldown
+    private float landingTime = 0f;
+    private bool isInLandingCooldown = false;
 
     void Start()
     {
@@ -165,6 +201,9 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
         isSnappingToTarget = false;
         takeoffTime = Time.time;
 
+        // Clear landing cooldown
+        isInLandingCooldown = false;
+
         // Predict if this jump allows tricks
         if (useTrajectoryPrediction && rb != null)
         {
@@ -228,13 +267,23 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
         // Reset trick permission
         tricksAllowedThisJump = false;
 
+        // Start post-landing cooldown
+        landingTime = Time.time;
+        isInLandingCooldown = true;
+
+        if (showDebug)
+        {
+            Debug.Log($"<color=orange>Post-landing cooldown started ({postLandingCooldown:F2}s)</color>");
+        }
+
         // Handle angle snapping if enabled
         if (enableAngleSnapping)
         {
-            // Calculate the target angle to snap to (nearest 360° increment)
-            landingTargetAngle = FindNearestCleanAngle(currentYRotation);
+            // Calculate target angles for BOTH X and Y rotations (nearest 360° increment)
+            landingTargetAngleX = FindNearestCleanAngle(currentXRotation);
+            landingTargetAngleY = FindNearestCleanAngle(currentYRotation);
 
-            // Calculate appropriate landing speed based on angle
+            // Calculate appropriate landing speed based on Y angle (spins determine speed)
             currentLandingSpeed = CalculateLandingSpeed(currentYRotation);
 
             isSnappingToTarget = true;
@@ -242,13 +291,15 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
             if (showDebug)
             {
                 string speedType = GetSpeedType(currentYRotation);
-                Debug.Log($"<color=yellow>Current: {currentYRotation:F1}°, Target: {landingTargetAngle:F1}°, Speed: {speedType} ({currentLandingSpeed:F1})</color>");
+                Debug.Log($"<color=yellow>X-Rotation: {currentXRotation:F1}° → {landingTargetAngleX:F1}°</color>");
+                Debug.Log($"<color=yellow>Y-Rotation: {currentYRotation:F1}° → {landingTargetAngleY:F1}°, Speed: {speedType} ({currentLandingSpeed:F1})</color>");
             }
         }
         else
         {
             // No snapping - just lerp to 0
-            landingTargetAngle = 0f;
+            landingTargetAngleX = 0f;
+            landingTargetAngleY = 0f;
             currentLandingSpeed = mediumSnapSpeed;
             isSnappingToTarget = true;
 
@@ -299,6 +350,30 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
 
     void HandleAirTricks()
     {
+        // Check if we're still in post-landing cooldown
+        if (isInLandingCooldown)
+        {
+            float timeSinceLanding = Time.time - landingTime;
+            if (timeSinceLanding < postLandingCooldown)
+            {
+                // Still in cooldown - block tricks
+                if (showDebug && Time.frameCount % 30 == 0)
+                {
+                    Debug.Log($"<color=orange>Cooldown active: {timeSinceLanding:F2}s / {postLandingCooldown:F2}s</color>");
+                }
+                return;
+            }
+            else
+            {
+                // Cooldown expired
+                isInLandingCooldown = false;
+                if (showDebug)
+                {
+                    Debug.Log("<color=green>Post-landing cooldown expired - tricks available</color>");
+                }
+            }
+        }
+
         // Check if tricks are allowed this jump
         if (useTrajectoryPrediction)
         {
@@ -334,26 +409,39 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
             StartTrick(360f);
             if (showDebug) Debug.Log("<color=cyan>FRONTFLIP!</color>");
         }
-        // BACKFLIP - Press Y button  
+        // BACKFLIP - Press B button  
         else if (backflipPressed && !isPerformingTrick)
         {
             StartTrick(-360f);
             if (showDebug) Debug.Log("<color=cyan>BACKFLIP!</color>");
         }
 
-        // Handle trick rotation
+        // Handle trick rotation (flips)
         if (isPerformingTrick)
         {
             PerformTrick();
         }
 
-        // SPINS - L-stick left/right
-        if (allowSpins && !isPerformingTrick)
+        // SPINS - L-stick left/right (can be done simultaneously with flips)
+        if (allowSpins)
         {
             float spinInput = bikeController.customSteerAxis;
             if (Mathf.Abs(spinInput) > 0.1f)
             {
-                currentYRotation += spinInput * spinSpeed * Time.deltaTime;
+                // Calculate velocity-based spin speed
+                float currentSpinSpeed = baseSpinSpeed;
+                if (useVelocityForSpins && rb != null)
+                {
+                    float velocityMultiplier = GetVelocitySpeedMultiplier();
+                    currentSpinSpeed = baseSpinSpeed * (1f + (spinVelocityMultiplier * velocityMultiplier));
+
+                    if (showVelocityDebug && Time.frameCount % 30 == 0)
+                    {
+                        Debug.Log($"<color=magenta>Spin Speed: {currentSpinSpeed:F1}°/s (base: {baseSpinSpeed}, mult: {velocityMultiplier:F2})</color>");
+                    }
+                }
+
+                currentYRotation += spinInput * currentSpinSpeed * Time.deltaTime;
 
                 if (showDebug && Time.frameCount % 30 == 0) // Log every 30 frames
                 {
@@ -371,11 +459,24 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
 
     void PerformTrick()
     {
+        // Calculate velocity-based speed
+        float currentTrickSpeed = baseTrickSpeed;
+        if (useVelocityForFlips && rb != null)
+        {
+            float velocityMultiplier = GetVelocitySpeedMultiplier();
+            currentTrickSpeed = baseTrickSpeed * (1f + (flipVelocityMultiplier * velocityMultiplier));
+
+            if (showVelocityDebug && Time.frameCount % 30 == 0)
+            {
+                Debug.Log($"<color=magenta>Flip Speed: {currentTrickSpeed:F1}°/s (base: {baseTrickSpeed}, mult: {velocityMultiplier:F2})</color>");
+            }
+        }
+
         // Smoothly rotate towards target
         currentXRotation = Mathf.MoveTowards(
             currentXRotation,
             targetXRotation,
-            trickSpeed * Time.deltaTime
+            currentTrickSpeed * Time.deltaTime
         );
 
         // Check if trick is complete
@@ -386,47 +487,67 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
         }
     }
 
+    float GetVelocitySpeedMultiplier()
+    {
+        if (rb == null) return 0f;
+
+        // Get horizontal velocity (ignore vertical component for more consistent feel)
+        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float speed = horizontalVelocity.magnitude;
+
+        // Normalize to 0-1 range based on reference velocity
+        float normalizedSpeed = Mathf.Clamp01(speed / referenceVelocity);
+
+        return normalizedSpeed;
+    }
+
     void HandleLanding()
     {
-        // Smoothly return to upright for X rotation (frontflips/backflips)
-        // Always use fast speed for frontflip/backflip recovery
-        currentXRotation = Mathf.Lerp(currentXRotation, 0f, Time.deltaTime * fastSnapSpeed);
-        isPerformingTrick = false;
-
-        // Handle Y rotation (spins) with variable speed based on angle
+        // Apply 360° snapping to BOTH X and Y rotations
         if (isSnappingToTarget)
         {
-            // Lerp toward target snap angle using calculated speed
+            // Handle X rotation (frontflips/backflips) with 360° snapping
+            // Always use fast speed for frontflip/backflip recovery
+            currentXRotation = Mathf.Lerp(
+                currentXRotation,
+                landingTargetAngleX,
+                Time.deltaTime * fastSnapSpeed
+            );
+
+            // Handle Y rotation (spins) with variable speed based on angle
             currentYRotation = Mathf.Lerp(
                 currentYRotation,
-                landingTargetAngle,
+                landingTargetAngleY,
                 Time.deltaTime * currentLandingSpeed
             );
 
-            // When landing is complete:
-            if (Mathf.Abs(currentYRotation - landingTargetAngle) < 1f)
-            {
-                currentYRotation = 0f;
-                landingTargetAngle = 0f;
-                isSnappingToTarget = false;
+            // Check if both rotations have settled
+            bool xSettled = Mathf.Abs(currentXRotation - landingTargetAngleX) < 1f;
+            bool ySettled = Mathf.Abs(currentYRotation - landingTargetAngleY) < 1f;
 
-                // FORCE-RESET to exact zero (prevents tiny floating point errors)
-                if (visualBikeParent != null)
-                {
-                    visualBikeParent.localRotation = Quaternion.identity;  // ← ADD THIS!
-                }
+            if (xSettled && ySettled)
+            {
+                // Reset both to 0° (since 360° = 0° visually)
+                currentXRotation = 0f;
+                currentYRotation = 0f;
+                landingTargetAngleX = 0f;
+                landingTargetAngleY = 0f;
+                isSnappingToTarget = false;
 
                 if (showDebug)
                 {
-                    Debug.Log("<color=green>Landing complete - FORCED to identity</color>");
+                    Debug.Log("<color=green>Landing complete - Reset to 0°</color>");
                 }
             }
         }
         else
         {
             // Normal lerp to 0 if not snapping (shouldn't happen, but safety)
+            currentXRotation = Mathf.Lerp(currentXRotation, 0f, Time.deltaTime * fastSnapSpeed);
             currentYRotation = Mathf.Lerp(currentYRotation, 0f, Time.deltaTime * mediumSnapSpeed);
         }
+
+        isPerformingTrick = false;
     }
 
     float FindNearestCleanAngle(float angle)
@@ -450,9 +571,20 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
         }
         else
         {
-            // Not close to a 360° increment - return 0 (will lerp smoothly)
-            // This handles 180° and other angles
-            return 0f;
+            // Not close to a 360° increment - snap in the direction that completes the rotation
+            // For angles > 180°, continue forward to next 360° multiple
+            // For angles < 180°, go back to previous 360° multiple
+
+            if (normalized > 180f)
+            {
+                // Past halfway (e.g., 270° backflip) - complete the rotation forward
+                return Mathf.Ceil(angle / 360f) * 360f;
+            }
+            else
+            {
+                // Before halfway (e.g., 90° frontflip) - snap back to previous
+                return Mathf.Floor(angle / 360f) * 360f;
+            }
         }
     }
 
@@ -542,41 +674,11 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
         {
             // Color based on trick availability
             if (tricksAllowedThisJump)
-                Gizmos.color = isPerformingTrick ? Color.cyan : Color.green; // Tricks allowed
+                Gizmos.color = isPerformingTrick ? Color.cyan : Color.green;
             else
-                Gizmos.color = Color.red; // Tricks blocked
+                Gizmos.color = Color.red;
 
             Gizmos.DrawWireSphere(transform.position, 1f);
-
-            // Draw raycast line in Scene view (if using height fallback)
-            if (!useTrajectoryPrediction)
-            {
-                float height = GetHeightAboveGround();
-                Vector3 groundPoint = transform.position + Vector3.down * height;
-
-                // Color based on whether tricks are allowed
-                if (height < minTrickHeight)
-                    Gizmos.color = Color.red; // Too low for tricks
-                else
-                    Gizmos.color = Color.green; // Tricks allowed
-
-                Gizmos.DrawLine(transform.position, groundPoint);
-                Gizmos.DrawSphere(groundPoint, 0.3f);
-            }
-        }
-
-        // Draw landing speed indicator when on ground and snapping
-        if (bikeController != null && !bikeController.isAirborne && isSnappingToTarget)
-        {
-            // Color based on current landing speed
-            if (currentLandingSpeed > 12f)
-                Gizmos.color = Color.red;      // Fast
-            else if (currentLandingSpeed < 5f)
-                Gizmos.color = Color.blue;     // Slow
-            else
-                Gizmos.color = Color.yellow;   // Medium
-
-            Gizmos.DrawWireSphere(transform.position + Vector3.up * 0.5f, 0.3f);
         }
     }
 }

@@ -1402,12 +1402,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7322583432936076820, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+      propertyPath: baseSpinSpeed
+      value: 270
+      objectReference: {fileID: 0}
+    - target: {fileID: 7322583432936076820, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       propertyPath: visualBikeParent
       value: 
       objectReference: {fileID: 898861490}
     - target: {fileID: 7322583432936076820, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       propertyPath: enableAngleSnapping
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7322583432936076820, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+      propertyPath: postLandingCooldown
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 7322583432936076820, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       propertyPath: useTrajectoryPrediction
