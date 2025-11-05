@@ -322,6 +322,7 @@ namespace SBPScripts
                 }
                 else if (isBunnyHopping)
                 {
+                    isAirborne = false;  // Grounded even while charging bunny hop
                     restingCrank = 100;
                 }
                 else
