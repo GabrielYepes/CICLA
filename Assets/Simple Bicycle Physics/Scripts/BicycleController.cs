@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -149,6 +149,10 @@ namespace SBPScripts
         public float bunnyHopStrength;
         public WayPointSystem wayPointSystem;
         public AirTimeSettings airTimeSettings;
+
+        // Double jump prevention
+        private float groundedTime = 0f;
+        public float minGroundedTimeForJump = 0.2f; // Must be grounded this long before jumping
 
         void Awake()
         {
@@ -319,16 +323,19 @@ namespace SBPScripts
                 {
                     isAirborne = true;
                     restingCrank = 100;
+                    groundedTime = 0f;  // ⬅️ ADD THIS LINE - Reset when airborne
                 }
                 else if (isBunnyHopping)
                 {
                     isAirborne = false;  // Grounded even while charging bunny hop
                     restingCrank = 100;
+                    groundedTime += Time.fixedDeltaTime;  
                 }
                 else
                 {
                     isAirborne = false;
                     restingCrank = 10;
+                    groundedTime += Time.fixedDeltaTime;  
                 }
                 // For stunts
                 // 5f is the snap to ground distance
@@ -358,11 +365,11 @@ namespace SBPScripts
                 transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, turnLeanAmount + cycleOscillation + GroundConformity(groundConformity));
             }
             //Wheelie
-            if(!isAirborne && wheelieInput && rawCustomAccelerationAxis>0)
+            if (!isAirborne && wheelieInput && rawCustomAccelerationAxis > 0 && !isBunnyHopping)  // ⬅️ ADD !isBunnyHopping
             {
                 rb.angularDamping = 15;
-                wheeliePower = customAccelerationAxis*150*System.Convert.ToInt32(wheelieToggle);
-                var rot = Quaternion.FromToRotation(transform.forward, new Vector3(transform.forward.x,0.75f,transform.forward.z));
+                wheeliePower = customAccelerationAxis * 150 * System.Convert.ToInt32(wheelieToggle);
+                var rot = Quaternion.FromToRotation(transform.forward, new Vector3(transform.forward.x, 0.75f, transform.forward.z));
                 rb.AddTorque(new Vector3(rot.x, rot.y, rot.z) * wheeliePower, ForceMode.Acceleration);
             }
             else
@@ -376,8 +383,7 @@ namespace SBPScripts
         {
             ApplyCustomInput();
 
-            //GetKeyUp/Down requires an Update Cycle
-            //BunnyHopping
+            //BunnyHopping with GROUND TIME CHECK
             if (bunnyHopInputState == 1)
             {
                 isBunnyHopping = true;
@@ -386,13 +392,16 @@ namespace SBPScripts
             if (bunnyHopInputState == -1)
                 StartCoroutine(DelayBunnyHop());
 
-            if (bunnyHopInputState == -1 && !isAirborne)
+            // REQUIRE MINIMUM GROUND TIME:
+            if (bunnyHopInputState == -1 && !isAirborne && groundedTime >= minGroundedTimeForJump)
+            {
                 rb.AddForce(transform.up * bunnyHopAmount * bunnyHopStrength, ForceMode.VelocityChange);
+                groundedTime = 0f; // Reset ground time after jump
+            }
             else
                 bunnyHopAmount = Mathf.Lerp(bunnyHopAmount, 0, Time.deltaTime * 8f);
 
             bunnyHopAmount = Mathf.Clamp01(bunnyHopAmount);
-
         }
         float GroundConformity(bool toggle)
         {
