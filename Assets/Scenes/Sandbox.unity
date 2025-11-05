@@ -595,12 +595,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isGrinding: 0
   grindSpeed: 8
-  heightOffset: 0.5
+  heightOffset: 0.2
   lerpSpeed: 10
   exitForceMultiplier: 1.5
+  jumpForce: 5
+  preserveHorizontalMomentum: 1
+  syncWheelVelocity: 1
   allowJumpOffRail: 1
   rPhysicsWheel: {fileID: 1114399618}
-  showDebug: 0
+  showDebug: 1
 --- !u!1001 &473502260
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1334,8 +1337,8 @@ GameObject:
   - component: {fileID: 1108642338}
   - component: {fileID: 1108642337}
   - component: {fileID: 1108642342}
-  - component: {fileID: 1108642341}
   - component: {fileID: 1108642340}
+  - component: {fileID: 1108642341}
   - component: {fileID: 1108642339}
   - component: {fileID: 1108642343}
   m_Layer: 0
@@ -1841,7 +1844,7 @@ MonoBehaviour:
   m_Sides: 6
   m_SegmentsPerUnit: 4
   m_Capped: 1
-  m_Radius: 0.05
+  m_Radius: 0.17
   m_Range: {x: 0, y: 1}
 --- !u!23 &1108642341
 MeshRenderer:
@@ -1909,7 +1912,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   normalDir: 0
-  showDebug: 0
+  showDebug: 1
   drawGizmos: 1
   railSpline: {fileID: 1108642337}
   totalSplineLength: 148.34564
@@ -1918,6 +1921,20 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4526251076611362504, guid: b17e5525707572842a9917629afcd1e1, type: 3}
   m_PrefabInstance: {fileID: 1434098360}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1114399625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114399618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba9399b0e43d9974493d3dc9371972ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grindController: {fileID: 413497913}
+  showDebug: 1
 --- !u!1 &1311758205 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c3534b3902eb20e48a9f518de24a4aec, type: 3}
@@ -2061,6 +2078,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7763693495198784921, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+      propertyPath: reversingSpeed
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2068,6 +2089,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3716333145644078608, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 413497913}
+    - targetCorrespondingSourceObject: {fileID: 4526251076611362504, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1114399625}
   m_SourcePrefab: {fileID: 100100000, guid: b17e5525707572842a9917629afcd1e1, type: 3}
 --- !u!1 &2000818794 stripped
 GameObject:
