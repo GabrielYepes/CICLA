@@ -298,7 +298,7 @@ MonoBehaviour:
   referenceTransform: {fileID: 0}
   copyPosition: 0
   positionOffset: {x: 0, y: 0, z: 0}
-  showDebug: 1
+  showDebug: 0
 --- !u!1 &474395199090141673
 GameObject:
   m_ObjectHideFlags: 0
@@ -1800,6 +1800,8 @@ GameObject:
   - component: {fileID: 7763693495198784921}
   - component: {fileID: 1119685889717728182}
   - component: {fileID: 7322583432936076820}
+  - component: {fileID: 8611824425217751532}
+  - component: {fileID: 8942837437680793026}
   m_Layer: 0
   m_Name: Biycycle Experimental
   m_TagString: Untagged
@@ -2007,7 +2009,7 @@ MonoBehaviour:
   torque: 10
   topSpeed: 20
   relaxedSpeed: 0.5
-  reversingSpeed: 0.5
+  reversingSpeed: 5
   centerOfMassOffset: {x: 0, y: 0, z: 0}
   isReversing: 0
   isAirborne: 0
@@ -2059,6 +2061,7 @@ MonoBehaviour:
     airTimeRotationSensitivity: 1
     heightThreshold: 1.5
     groundSnapSensitivity: 2
+  minGroundedTimeForJump: 0.2
 --- !u!114 &1119685889717728182
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2091,23 +2094,78 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b699923168e1fa443a112c66a5ae3d45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visualBikeParent: {fileID: 7298597664096063406}
+  visualBikeParent: {fileID: 5334183820446892637}
   characterTransform: {fileID: 0}
   extraVisualObjects: []
-  trickSpeed: 360
-  minAirTimeForTricks: 0.5
+  baseTrickSpeed: 360
+  useVelocityForFlips: 1
+  flipVelocityMultiplier: 0.5
+  minAirTimeForTricks: 0.1
   useTrajectoryPrediction: 1
-  minTrickHeight: 2.5
+  minTrickHeight: 2
   frontflipPressed: 0
   backflipPressed: 0
   enableAngleSnapping: 1
   snap360Threshold: 20
+  postLandingCooldown: 0.3
   fastSnapSpeed: 15
   mediumSnapSpeed: 8
   slowSnapSpeed: 3
   allowSpins: 1
-  spinSpeed: 360
+  baseSpinSpeed: 270
+  useVelocityForSpins: 1
+  spinVelocityMultiplier: 0.3
+  referenceVelocity: 25
+  showVelocityDebug: 0
   showDebug: 0
+--- !u!114 &8611824425217751532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3716333145644078608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 726ca29beca159e45bef2403e00dbcc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isGrinding: 0
+  grindSpeed: 8
+  heightOffset: 0.2
+  lerpSpeed: 10
+  exitForceMultiplier: 1.5
+  jumpForce: 5
+  preserveHorizontalMomentum: 1
+  syncWheelVelocity: 1
+  allowJumpOffRail: 1
+  rPhysicsWheel: {fileID: 4526251076611362504}
+  showDebug: 0
+--- !u!114 &8942837437680793026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3716333145644078608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98ae91df4c2148f4a998e8d9c1009ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseFlipScore: 150
+  baseSpinScore: 100
+  grindScorePerSecond: 50
+  longGrindBonusThreshold: 3
+  longGrindBonus: 100
+  speedMultiplierThreshold: 15
+  speedMultiplier: 1.2
+  comboMultiplier: 2
+  cleanLandingMultiplier: 1.5
+  landingAngleTolerance: 15
+  comboTimeWindow: 2
+  showDebugLogs: 1
+  showDetailedStats: 0
 --- !u!1 &3791339719506743959
 GameObject:
   m_ObjectHideFlags: 0
@@ -2728,6 +2786,7 @@ GameObject:
   - component: {fileID: 6856038201671095372}
   - component: {fileID: 571869902600450770}
   - component: {fileID: 4526251076611362502}
+  - component: {fileID: 6389558858672716429}
   m_Layer: 0
   m_Name: RPhysicsWheel
   m_TagString: Untagged
@@ -2954,6 +3013,20 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.010728648
   m_Center: {x: -0.0000063257758, y: 0, z: 0.0000018612482}
+--- !u!114 &6389558858672716429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4526251076611362504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba9399b0e43d9974493d3dc9371972ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grindController: {fileID: 8611824425217751532}
+  showDebug: 1
 --- !u!1 &4526251076664501405
 GameObject:
   m_ObjectHideFlags: 0
@@ -5121,7 +5194,7 @@ MonoBehaviour:
   referenceTransform: {fileID: 0}
   copyPosition: 0
   positionOffset: {x: 0, y: 0, z: 0}
-  showDebug: 1
+  showDebug: 0
 --- !u!1 &7116460259694656956
 GameObject:
   m_ObjectHideFlags: 0

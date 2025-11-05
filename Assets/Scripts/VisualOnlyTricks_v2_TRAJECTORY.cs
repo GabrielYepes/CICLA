@@ -657,8 +657,10 @@ public class VisualOnlyTricks_v2_Trajectory : MonoBehaviour
         backflipPressed = pressed;
     }
 
-    // Public read-only properties for future trick tracking/UI
+    // Public read-only properties for trick tracking/UI
     public float CurrentRotation => currentYRotation;
+    public float CurrentXRotation => currentXRotation; 
+    public float CurrentYRotation => currentYRotation;
     public bool IsAirborne => bikeController.isAirborne;
     public bool IsPerformingTrick => isPerformingTrick;
     public bool TricksAllowed => tricksAllowedThisJump;

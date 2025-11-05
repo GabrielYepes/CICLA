@@ -603,7 +603,32 @@ MonoBehaviour:
   syncWheelVelocity: 1
   allowJumpOffRail: 1
   rPhysicsWheel: {fileID: 1114399618}
-  showDebug: 1
+  showDebug: 0
+--- !u!114 &413497919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 413497912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98ae91df4c2148f4a998e8d9c1009ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseFlipScore: 150
+  baseSpinScore: 100
+  grindScorePerSecond: 50
+  longGrindBonusThreshold: 3
+  longGrindBonus: 100
+  speedMultiplierThreshold: 15
+  speedMultiplier: 1.2
+  comboMultiplier: 2
+  cleanLandingMultiplier: 1.5
+  landingAngleTolerance: 15
+  comboTimeWindow: 2
+  showDebugLogs: 1
+  showDetailedStats: 0
 --- !u!1001 &473502260
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2016,7 +2041,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1119685889717728182, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       propertyPath: showDebugLogs
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2443207644166027301, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       propertyPath: showDebug
@@ -2032,7 +2057,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7322583432936076820, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       propertyPath: showDebug
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7322583432936076820, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       propertyPath: allowSpins
@@ -2089,6 +2114,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3716333145644078608, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 413497913}
+    - targetCorrespondingSourceObject: {fileID: 3716333145644078608, guid: b17e5525707572842a9917629afcd1e1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 413497919}
     - targetCorrespondingSourceObject: {fileID: 4526251076611362504, guid: b17e5525707572842a9917629afcd1e1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1114399625}
