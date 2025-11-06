@@ -412,9 +412,9 @@ public class TrickScoringSystem : MonoBehaviour
 
         // Positive rotation = Backflip, Negative = Frontflip (depends on your setup)
         if (currentX > 0 || (currentX > -180 && currentX < 0))
-            return "Back";
-        else
             return "Front";
+        else
+            return "Back";
     }
 
     float NormalizeAngle(float angle)
