@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - Rail
+  - AnimationToFollow
+  - TrackedLimb
   layers:
   - Default
   - TransparentFX
@@ -12,8 +14,8 @@ TagManager:
   - Occludable
   - Water
   - UI
-  - 
-  - 
+  - Ground
+  - Player
   - 
   - 
   - 
