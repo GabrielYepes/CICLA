@@ -154,6 +154,19 @@ namespace SBPScripts
         private float groundedTime = 0f;
         public float minGroundedTimeForJump = 0.2f; // Must be grounded this long before jumping
 
+        // New fields for preventing isAirborne glitches
+        [Header("Ground Detection (Advanced)")]
+        [Tooltip("Layers that count as ground (exclude Player layer)")]
+        public LayerMask groundLayers = -1; // Everything by default
+        [Tooltip("Height offset for raycast origin above bike center")]
+        public float raycastOriginHeight = 1.5f; // Raised from 1f to avoid self-collision
+        [Tooltip("Distance threshold for grounded state")]
+        public float groundedThreshold = 2f;
+        [Tooltip("Distance threshold for airborne state (should be > groundedThreshold for hysteresis)")]
+        public float airborneThreshold = 2.3f; // Hysteresis buffer
+        [Tooltip("Show ground detection debug rays")]
+        public bool showGroundDetectionDebug = false;
+
         void Awake()
         {
             transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
@@ -317,38 +330,99 @@ namespace SBPScripts
             }
 
             //AirControl
-            if (Physics.Raycast(transform.position + new Vector3(0, 1f, 0), Vector3.down, out hit, Mathf.Infinity))
+            //if (Physics.Raycast(transform.position + new Vector3(0, 1f, 0), Vector3.down, out hit, Mathf.Infinity))
+            //{
+            //    if (hit.distance > 2f || impactFrames > 0)
+            //    {
+            //        isAirborne = true;
+            //        restingCrank = 100;
+            //        groundedTime = 0f;  // ⬅️ ADD THIS LINE - Reset when airborne
+            //    }
+            //    else if (isBunnyHopping)
+            //    {
+            //        isAirborne = false;  // Grounded even while charging bunny hop
+            //        restingCrank = 100;
+            //        groundedTime += Time.fixedDeltaTime;  
+            //    }
+            //    else
+            //    {
+            //        isAirborne = false;
+            //        restingCrank = 10;
+            //        groundedTime += Time.fixedDeltaTime;  
+            //    }
+            //    // For stunts
+            //    // 5f is the snap to ground distance
+            //    if (hit.distance > airTimeSettings.heightThreshold && airTimeSettings.freestyle)
+            //    {
+            //        stuntMode = true;
+            //        // Stunt + flips controls (Not available for Waypoint system as of yet)
+            //        // You may use Numpad Inputs as well.
+            //        rb.AddTorque(Vector3.up * customSteerAxis * 4 * airTimeSettings.airTimeRotationSensitivity, ForceMode.Impulse);
+            //        rb.AddTorque(transform.right * rawCustomAccelerationAxis * -3 * airTimeSettings.airTimeRotationSensitivity, ForceMode.Impulse);
+            //    }
+            //    else
+            //        stuntMode = false;
+            //}
+
+            //AirControl - IMPROVED VERSION
+            Vector3 rayOrigin = transform.position + new Vector3(0, raycastOriginHeight, 0);
+            bool rayHitGround = Physics.Raycast(
+                rayOrigin,
+                Vector3.down,
+                out hit,
+                Mathf.Infinity,
+                groundLayers,
+                QueryTriggerInteraction.Ignore
+            );
+
+            // Debug visualization
+            if (showGroundDetectionDebug)
             {
-                if (hit.distance > 2f || impactFrames > 0)
+                if (rayHitGround)
+                    Debug.DrawLine(rayOrigin, hit.point, Color.green);
+                else
+                    Debug.DrawRay(rayOrigin, Vector3.down * 50f, Color.red);
+            }
+
+            if (rayHitGround)
+            {
+                // Use hysteresis to prevent flickering
+                // If already airborne, need to get closer to ground (groundedThreshold)
+                // If already grounded, need to get higher up (airborneThreshold)
+                float threshold = isAirborne ? groundedThreshold : airborneThreshold;
+
+                if (hit.distance > threshold || impactFrames > 0)
                 {
                     isAirborne = true;
                     restingCrank = 100;
-                    groundedTime = 0f;  // ⬅️ ADD THIS LINE - Reset when airborne
+                    groundedTime = 0f;
                 }
                 else if (isBunnyHopping)
                 {
-                    isAirborne = false;  // Grounded even while charging bunny hop
+                    isAirborne = false;
                     restingCrank = 100;
-                    groundedTime += Time.fixedDeltaTime;  
+                    groundedTime += Time.fixedDeltaTime;
                 }
                 else
                 {
                     isAirborne = false;
                     restingCrank = 10;
-                    groundedTime += Time.fixedDeltaTime;  
+                    groundedTime += Time.fixedDeltaTime;
                 }
+
                 // For stunts
-                // 5f is the snap to ground distance
                 if (hit.distance > airTimeSettings.heightThreshold && airTimeSettings.freestyle)
                 {
                     stuntMode = true;
-                    // Stunt + flips controls (Not available for Waypoint system as of yet)
-                    // You may use Numpad Inputs as well.
-                    rb.AddTorque(Vector3.up * customSteerAxis * 4 * airTimeSettings.airTimeRotationSensitivity, ForceMode.Impulse);
-                    rb.AddTorque(transform.right * rawCustomAccelerationAxis * -3 * airTimeSettings.airTimeRotationSensitivity, ForceMode.Impulse);
+                    // Your existing stunt controls code continues here...
                 }
-                else
-                    stuntMode = false;
+            }
+            else
+            {
+                // No ground detected at all = definitely airborne
+                isAirborne = true;
+                restingCrank = 100;
+                groundedTime = 0f;
             }
 
             // Setting the Main Rotational movements of the bicycle

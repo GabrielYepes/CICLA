@@ -32,7 +32,7 @@ public class BikeTrailController : MonoBehaviour
             rb = bicycleController.GetComponent<Rigidbody>();
 
         if (grindController == null)
-            grindController = FindObjectOfType<BikeGrindController>();
+            grindController = Object.FindAnyObjectByType<BikeGrindController>();
 
         if (trails == null || trails.Length == 0)
             trails = GetComponentsInChildren<TrailRenderer>();
