@@ -19,9 +19,23 @@ namespace SBPScripts
         [SerializeField] private bool isGrinding;
 
         [Header("Grind Settings")]
-        [SerializeField] private float grindSpeed = 8f;
+        [Tooltip("How to determine grind speed")]
+        public GrindSpeedMode grindSpeedMode = GrindSpeedMode.UseEntrySpeed;
+        [Tooltip("Fixed speed when using FixedSpeed mode")]
+        [SerializeField] private float fixedGrindSpeed = 8f;
+        [Tooltip("Minimum grind speed (prevents getting stuck)")]
+        [SerializeField] private float minGrindSpeed = 3f;
+        [Tooltip("Maximum grind speed (prevents exploits)")]
+        [SerializeField] private float maxGrindSpeed = 30f;
         [SerializeField] private float heightOffset = 0.5f;
         [SerializeField] private float lerpSpeed = 10f;
+
+        public enum GrindSpeedMode
+        {
+            FixedSpeed,      // Use fixedGrindSpeed value
+            UseEntrySpeed,   // Match speed when entering rail
+            PreserveSpeed    // Maintain whatever speed you have (can accelerate/decelerate)
+        }
 
         [Header("Exit Settings")]
         [SerializeField] private float exitForceMultiplier = 1.5f;
@@ -30,6 +44,8 @@ namespace SBPScripts
         [Tooltip("Apply exit velocity to wheels as well (prevents initial physics jitter)")]
         [SerializeField] private bool syncWheelVelocity = true;
         [SerializeField] private bool allowJumpOffRail = true;
+        [Tooltip("Cooldown after exiting a rail before you can grind again (prevents spam exploit)")]
+        [SerializeField] private float regrindCooldown = 0.3f;
 
         [Header("Physics Wheel References")]
         [SerializeField] private GameObject rPhysicsWheel; // Back wheel - will be auto-assigned
@@ -48,6 +64,7 @@ namespace SBPScripts
         private float timeForFullSpline;
         private float elapsedTime;
         private bool wasGrinding;
+        private float activeGrindSpeed; // The actual speed being used for this grind
 
         // Physics state storage (for restoration after grind)
         private Vector3 velocityBeforeGrind;
@@ -56,6 +73,10 @@ namespace SBPScripts
         // Real-time velocity tracking during grind
         private Vector3 lastGrindPosition;
         private Vector3 currentGrindVelocity;
+
+        // Cooldown tracking
+        private float lastExitTime;
+        private bool canGrind = true;
 
         // Input tracking
         private bool jumpInputPressed;
@@ -132,6 +153,13 @@ namespace SBPScripts
 
         private void Update()
         {
+            // Handle re-grind cooldown
+            if (!canGrind && Time.time >= lastExitTime + regrindCooldown)
+            {
+                canGrind = true;
+                if (showDebug) Debug.Log("<color=green>Re-grind available</color>");
+            }
+
             // Detect grind state changes
             if (isGrinding != wasGrinding)
             {
@@ -158,6 +186,13 @@ namespace SBPScripts
                 return;
             }
 
+            // Check cooldown to prevent spam exploit
+            if (!canGrind)
+            {
+                if (showDebug) Debug.Log($"<color=yellow>Cooldown active ({Time.time - lastExitTime:F2}s / {regrindCooldown:F2}s), ignoring rail collision</color>");
+                return;
+            }
+
             if (showDebug) Debug.Log($"<color=green>Rail collision forwarded from wheel!</color>");
             StartGrind(railObject);
         }
@@ -177,6 +212,32 @@ namespace SBPScripts
             // Store current velocity for exit
             velocityBeforeGrind = mainRigidbody.linearVelocity;
             angularVelocityBeforeGrind = mainRigidbody.angularVelocity;
+
+            // DETERMINE GRIND SPEED based on mode
+            switch (grindSpeedMode)
+            {
+                case GrindSpeedMode.FixedSpeed:
+                    activeGrindSpeed = fixedGrindSpeed;
+                    break;
+
+                case GrindSpeedMode.UseEntrySpeed:
+                    // Match the speed you had when hitting the rail
+                    activeGrindSpeed = velocityBeforeGrind.magnitude;
+                    break;
+
+                case GrindSpeedMode.PreserveSpeed:
+                    // Start with entry speed, but allow it to change during grind
+                    activeGrindSpeed = velocityBeforeGrind.magnitude;
+                    break;
+            }
+
+            // CLAMP SPEED to prevent exploits and getting stuck
+            activeGrindSpeed = Mathf.Clamp(activeGrindSpeed, minGrindSpeed, maxGrindSpeed);
+
+            if (showDebug)
+            {
+                Debug.Log($"<color=cyan>Grind Speed Mode: {grindSpeedMode}, Entry: {velocityBeforeGrind.magnitude:F2} m/s, Active: {activeGrindSpeed:F2} m/s</color>");
+            }
 
             // Initialize velocity tracking
             lastGrindPosition = Vector3.zero; // Will be set on first frame
@@ -236,8 +297,8 @@ namespace SBPScripts
 
         private void CalculateAndSetRailPosition()
         {
-            // Calculate time needed to traverse full spline
-            timeForFullSpline = currentRailScript.totalSplineLength / grindSpeed;
+            // Calculate time needed to traverse full spline at active grind speed
+            timeForFullSpline = currentRailScript.totalSplineLength / activeGrindSpeed;
 
             // Find nearest point on spline to bike's current position
             Vector3 splinePoint;
@@ -392,6 +453,12 @@ namespace SBPScripts
             currentRailScript = null;
             lastGrindPosition = Vector3.zero;
             currentGrindVelocity = Vector3.zero;
+
+            // Start cooldown to prevent immediate re-grind spam
+            lastExitTime = Time.time;
+            canGrind = false;
+
+            if (showDebug) Debug.Log($"<color=yellow>Re-grind cooldown started ({regrindCooldown:F2}s)</color>");
         }
 
         private void OnGrindStart()
