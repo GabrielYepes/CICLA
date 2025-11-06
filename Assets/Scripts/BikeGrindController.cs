@@ -27,6 +27,12 @@ namespace SBPScripts
         [SerializeField] private float minGrindSpeed = 3f;
         [Tooltip("Maximum grind speed (prevents exploits)")]
         [SerializeField] private float maxGrindSpeed = 30f;
+        [Tooltip("Gravity influence on speed in PreserveSpeed mode - only accelerates on downhill slopes (0 = no gravity, 1 = full gravity)")]
+        [Range(0f, 1f)]
+        [SerializeField] private float gravityInfluence = 0.5f;
+        [Tooltip("Speed decay rate when not on downhill (0 = instant lock, 1 = no decay/infinite momentum)")]
+        [Range(0f, 1f)]
+        [SerializeField] private float momentumPreservation = 0.95f;
         [SerializeField] private float heightOffset = 0.5f;
         [SerializeField] private float lerpSpeed = 10f;
 
@@ -61,8 +67,8 @@ namespace SBPScripts
         private Rigidbody rWheelRb;
 
         // Grind state
-        private float timeForFullSpline;
-        private float elapsedTime;
+        private float currentDistanceAlongSpline; // Distance traveled in meters
+        private float elapsedTime; // Keep for compatibility but not used for movement
         private bool wasGrinding;
         private float activeGrindSpeed; // The actual speed being used for this grind
 
@@ -297,13 +303,12 @@ namespace SBPScripts
 
         private void CalculateAndSetRailPosition()
         {
-            // Calculate time needed to traverse full spline at active grind speed
-            timeForFullSpline = currentRailScript.totalSplineLength / activeGrindSpeed;
-
             // Find nearest point on spline to bike's current position
             Vector3 splinePoint;
             float normalisedTime = currentRailScript.CalculateTargetRailPoint(transform.position, out splinePoint);
-            elapsedTime = timeForFullSpline * normalisedTime;
+
+            // Convert normalized time to actual distance along spline
+            currentDistanceAlongSpline = normalisedTime * currentRailScript.totalSplineLength;
 
             // Get spline data at this position
             float3 pos, forward, up;
@@ -317,7 +322,7 @@ namespace SBPScripts
 
             if (showDebug)
             {
-                Debug.Log($"<color=cyan>Rail position set - Progress: {normalisedTime:F2}, Direction: {(currentRailScript.normalDir ? "Forward" : "Backward")}</color>");
+                Debug.Log($"<color=cyan>Rail position set - Distance: {currentDistanceAlongSpline:F2}m / {currentRailScript.totalSplineLength:F2}m, Direction: {(currentRailScript.normalDir ? "Forward" : "Backward")}</color>");
             }
         }
 
@@ -326,8 +331,18 @@ namespace SBPScripts
             if (currentRailScript == null || !isGrinding)
                 return;
 
-            // Calculate progress along rail (0 to 1)
-            float progress = elapsedTime / timeForFullSpline;
+            // Move by actual distance instead of parametric time
+            // This ensures constant world-space velocity regardless of spline point spacing
+            float distanceThisFrame = activeGrindSpeed * Time.fixedDeltaTime;
+
+            // Update distance along spline based on direction
+            if (currentRailScript.normalDir)
+                currentDistanceAlongSpline += distanceThisFrame;
+            else
+                currentDistanceAlongSpline -= distanceThisFrame;
+
+            // Convert distance to normalized time (0-1) for spline evaluation
+            float progress = currentDistanceAlongSpline / currentRailScript.totalSplineLength;
 
             // Check if we've reached the end of the rail
             if (progress < 0 || progress > 1)
@@ -338,11 +353,9 @@ namespace SBPScripts
             }
 
             // Calculate next frame's progress for rotation calculation
-            float nextTimeNormalised;
-            if (currentRailScript.normalDir)
-                nextTimeNormalised = (elapsedTime + Time.fixedDeltaTime) / timeForFullSpline;
-            else
-                nextTimeNormalised = (elapsedTime - Time.fixedDeltaTime) / timeForFullSpline;
+            float nextDistanceAlongSpline = currentDistanceAlongSpline + (currentRailScript.normalDir ? distanceThisFrame : -distanceThisFrame);
+            float nextTimeNormalised = nextDistanceAlongSpline / currentRailScript.totalSplineLength;
+            nextTimeNormalised = Mathf.Clamp01(nextTimeNormalised); // Ensure it stays in 0-1 range
 
             // Get current and next positions on spline
             float3 pos, tangent, up;
@@ -361,7 +374,7 @@ namespace SBPScripts
 
                 if (showDebug && Time.frameCount % 30 == 0) // Log every 30 frames
                 {
-                    Debug.Log($"<color=cyan>Grind Velocity: {currentGrindVelocity.magnitude:F2} m/s</color>");
+                    Debug.Log($"<color=cyan>Grind Velocity: {currentGrindVelocity.magnitude:F2} m/s | activeGrindSpeed: {activeGrindSpeed:F2} | Mode: {grindSpeedMode}</color>");
                 }
             }
             lastGrindPosition = worldPos;
@@ -384,11 +397,54 @@ namespace SBPScripts
                 lerpSpeed * Time.fixedDeltaTime
             );
 
-            // Update elapsed time based on direction
-            if (currentRailScript.normalDir)
-                elapsedTime += Time.fixedDeltaTime;
-            else
-                elapsedTime -= Time.fixedDeltaTime;
+            // PRESERVE SPEED MODE: Apply gravity-based acceleration on downhill sections
+            if (grindSpeedMode == GrindSpeedMode.PreserveSpeed)
+            {
+                // Use the rail's tangent (forward direction) to determine slope
+                Vector3 railDirection = ((Vector3)tangent).normalized;
+
+                // Calculate the downward slope component
+                float slopeY = -railDirection.y; // Negate so downhill = positive
+
+                // DOWNHILL: Apply acceleration
+                if (slopeY > 0.01f) // Small threshold to ignore near-flat sections
+                {
+                    // Gravity acceleration scaled by slope steepness
+                    float gravityMagnitude = Mathf.Abs(Physics.gravity.y);
+                    float acceleration = gravityMagnitude * slopeY * gravityInfluence * Time.fixedDeltaTime;
+
+                    // Update speed
+                    activeGrindSpeed += acceleration;
+                    activeGrindSpeed = Mathf.Clamp(activeGrindSpeed, minGrindSpeed, maxGrindSpeed);
+
+                    if (showDebug && Time.frameCount % 30 == 0)
+                    {
+                        Debug.Log($"<color=magenta>PreserveSpeed: Slope {slopeY:F3} (down), Speed: {activeGrindSpeed:F2} m/s (+{acceleration:F3})</color>");
+                    }
+                }
+                // FLAT/UPHILL: Apply momentum decay (friction-like effect)
+                else
+                {
+                    // If momentum preservation is 1.0, skip decay entirely (infinite momentum)
+                    if (momentumPreservation < 1.0f)
+                    {
+                        // Calculate how much speed to lose this frame
+                        float speedLoss = activeGrindSpeed * (1f - momentumPreservation) * Time.fixedDeltaTime * 60f;
+
+                        activeGrindSpeed -= speedLoss;
+                        activeGrindSpeed = Mathf.Clamp(activeGrindSpeed, minGrindSpeed, maxGrindSpeed);
+
+                        if (showDebug && Time.frameCount % 60 == 0)
+                        {
+                            Debug.Log($"<color=grey>PreserveSpeed: Flat/Uphill {slopeY:F3}, Speed: {activeGrindSpeed:F2} m/s (-{speedLoss:F3} decay)</color>");
+                        }
+                    }
+                    else if (showDebug && Time.frameCount % 90 == 0)
+                    {
+                        Debug.Log($"<color=cyan>PreserveSpeed: Flat/Uphill {slopeY:F3}, Speed: {activeGrindSpeed:F2} m/s (NO DECAY - infinite momentum)</color>");
+                    }
+                }
+            }
         }
 
         private void ExitGrind(bool jumped)
@@ -479,7 +535,7 @@ namespace SBPScripts
         // Public getters for other systems
         public bool IsGrinding => isGrinding;
         public RailScript CurrentRail => currentRailScript;
-        public float GrindProgress => isGrinding ? (elapsedTime / timeForFullSpline) : 0f;
+        public float GrindProgress => isGrinding ? (currentDistanceAlongSpline / currentRailScript.totalSplineLength) : 0f;
         public float GrindSpeed => currentGrindVelocity.magnitude;
 
         private void OnDrawGizmos()
