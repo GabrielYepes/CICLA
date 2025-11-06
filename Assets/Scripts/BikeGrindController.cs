@@ -413,6 +413,7 @@ namespace SBPScripts
         public bool IsGrinding => isGrinding;
         public RailScript CurrentRail => currentRailScript;
         public float GrindProgress => isGrinding ? (elapsedTime / timeForFullSpline) : 0f;
+        public float GrindSpeed => currentGrindVelocity.magnitude;
 
         private void OnDrawGizmos()
         {
