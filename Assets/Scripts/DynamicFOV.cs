@@ -1,12 +1,15 @@
 using UnityEngine;
+using Unity.Cinemachine;
 
 namespace SBPScripts
 {
-    [RequireComponent(typeof(Camera))]
     public class DynamicFOV : MonoBehaviour
     {
         [Header("References")]
         public BicycleController bicycleController;
+
+        [Tooltip("The Cinemachine camera to control FOV on")]
+        public CinemachineCamera cinemachineCamera;
 
         [Header("FOV Settings")]
         [Tooltip("Base FOV when stationary")]
@@ -27,17 +30,33 @@ namespace SBPScripts
         public bool useCustomCurve = false;
         public AnimationCurve fovCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
-        private Camera cam;
         private float targetFOV;
+        private float currentFOV;
 
         void Start()
         {
-            cam = GetComponent<Camera>();
+            // Auto-find Cinemachine camera if not assigned
+            if (cinemachineCamera == null)
+            {
+                cinemachineCamera = GetComponent<CinemachineCamera>();
+
+                if (cinemachineCamera == null)
+                {
+                    cinemachineCamera = FindFirstObjectByType<CinemachineCamera>();
+                }
+
+                if (cinemachineCamera == null)
+                {
+                    Debug.LogError("DynamicFOV: No CinemachineCamera found!");
+                    enabled = false;
+                    return;
+                }
+            }
 
             // Auto-find bicycle controller if not assigned
             if (bicycleController == null)
             {
-                bicycleController = FindObjectOfType<BicycleController>();
+                bicycleController = FindFirstObjectByType<BicycleController>();
                 if (bicycleController == null)
                 {
                     Debug.LogError("DynamicFOV: No BicycleController found!");
@@ -47,13 +66,14 @@ namespace SBPScripts
             }
 
             // Set initial FOV
-            cam.fieldOfView = baseFOV;
+            cinemachineCamera.Lens.FieldOfView = baseFOV;
+            currentFOV = baseFOV;
             targetFOV = baseFOV;
         }
 
         void LateUpdate()
         {
-            if (bicycleController == null) return;
+            if (bicycleController == null || cinemachineCamera == null) return;
 
             // Get current speed
             float currentSpeed = bicycleController.rb.linearVelocity.magnitude;
@@ -71,7 +91,10 @@ namespace SBPScripts
             targetFOV = Mathf.Lerp(baseFOV, maxFOV, speedRatio);
 
             // Smoothly transition to target FOV
-            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, Time.deltaTime * fovTransitionSpeed);
+            currentFOV = Mathf.Lerp(currentFOV, targetFOV, Time.deltaTime * fovTransitionSpeed);
+
+            // Apply to Cinemachine camera
+            cinemachineCamera.Lens.FieldOfView = currentFOV;
         }
 
         // Debug visualization
@@ -81,7 +104,7 @@ namespace SBPScripts
             {
                 float speed = bicycleController.rb.linearVelocity.magnitude;
                 GUI.Label(new Rect(10, 10, 300, 20),
-                    $"Speed: {speed:F1} | FOV: {cam.fieldOfView:F1}° (Target: {targetFOV:F1}°)");
+                    $"Speed: {speed:F1} | FOV: {currentFOV:F1}° (Target: {targetFOV:F1}°)");
             }
         }
     }
