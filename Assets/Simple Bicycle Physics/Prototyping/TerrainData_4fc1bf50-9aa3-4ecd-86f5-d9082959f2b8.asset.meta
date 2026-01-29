@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b7762bced81562f47b21a69d4b7f7d48
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 15600000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Prototyping/TerrainData_4fc1bf50-9aa3-4ecd-86f5-d9082959f2b8.asset
+  uploadId: 568948

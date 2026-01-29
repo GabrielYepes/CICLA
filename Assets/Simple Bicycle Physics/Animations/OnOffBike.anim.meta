@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 27d40b5fd361cb644a9f6156e06f6ded
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Animations/OnOffBike.anim
+  uploadId: 568948

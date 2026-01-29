@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 20b5d38c4edd565488c911aea265a2b8
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Basic MTB Setup/MTBRiderFatBike.unity
+  uploadId: 568948

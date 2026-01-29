@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: fa8fe3a83b844d64ba8e74e50e815ead
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scripts/BicycleSounds.cs
+  uploadId: 568948

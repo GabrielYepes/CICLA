@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d5657f058293b3345b588e77acbd8ad5
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Basic Cyclist Setup/BMXSetup.unity
+  uploadId: 568948

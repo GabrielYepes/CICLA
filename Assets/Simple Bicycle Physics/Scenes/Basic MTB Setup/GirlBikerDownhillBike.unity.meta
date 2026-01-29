@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 05eb1c091469664409f32f8892cfb3ef
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Basic MTB Setup/GirlBikerDownhillBike.unity
+  uploadId: 568948

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3ab47840993e3924eb6621b3fdf90428
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Prefabs/Biycycle Standard.prefab
+  uploadId: 568948

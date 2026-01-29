@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e1a66eea4e47bc347b3afeb3ba18e212
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Materials/Chrome.mat
+  uploadId: 568948

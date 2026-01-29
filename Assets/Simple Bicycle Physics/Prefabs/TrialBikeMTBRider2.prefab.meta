@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c35bda782e10ae34f8f9d898ddfba4ae
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Prefabs/TrialBikeMTBRider2.prefab
+  uploadId: 568948

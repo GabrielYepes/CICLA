@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a5a9de5a25135184b9782e864e9bf8e7
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Materials/Black Metal.mat
+  uploadId: 568948

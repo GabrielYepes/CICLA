@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6aaf15c16f1bb2e42a674316c91aecc2
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Editor/CrashDummy.prefab
+  uploadId: 568948

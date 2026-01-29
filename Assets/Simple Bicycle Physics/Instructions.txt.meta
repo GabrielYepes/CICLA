@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9d45181f723bd454bb344f30fd3c09f1
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Instructions.txt
+  uploadId: 568948

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ef76de3d013ad1849af8deef39c300c0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Editor/TemplatePrefab.prefab
+  uploadId: 568948

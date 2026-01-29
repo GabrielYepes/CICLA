@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7f2d5e0b610c1bd4c84ee203bd38777d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Materials/WhiteOutfit.mat
+  uploadId: 568948

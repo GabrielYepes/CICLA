@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f7bb6da1b3a0c4f4192330db47bc1b2d
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 206818
+  packageName: Simple Bicycle Physics
+  packageVersion: 2.4
+  assetPath: Assets/Simple Bicycle Physics/Scenes/Vehicle EnterExit Setup/MTBRider3
+    EnterExit Setup.unity
+  uploadId: 568948
